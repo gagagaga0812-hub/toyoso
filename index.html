@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>花信手帖 · 按日期翻阅的资料库</title>
+<style>
+  :root{
+    --paper:#F4F8FC;
+    --paper2:#FDFEFF;
+    --ink:#2E3B47;
+    --ink2:#55677A;
+    --ink3:#8FA1B3;
+    --rose:#6E93B5;
+    --rose-deep:#4F7396;
+    --rose-soft:#E2EDF6;
+    --sage:#7FA3A8;
+    --line:#DCE6EE;
+    --line-soft:#E9F0F6;
+    --gold:#9FB4C6;
+    --serif:"Noto Serif SC","Songti SC","STSong","SimSun",serif;
+    --sans:"Noto Sans SC","PingFang SC","Microsoft YaHei",sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:var(--sans);color:var(--ink);background:var(--paper);
+    background-image:
+      radial-gradient(ellipse at 15% 0%,rgba(110,147,181,.07),transparent 50%),
+      radial-gradient(ellipse at 90% 100%,rgba(127,163,168,.07),transparent 50%),
+      repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(110,147,181,.02) 3px,rgba(110,147,181,.02) 4px);
+    -webkit-font-smoothing:antialiased;
+  }
+  button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+  input{font-family:inherit;font-size:13px;color:var(--ink);outline:none}
+  ::selection{background:var(--rose-soft)}
+  .en{font-family:Georgia,"Times New Roman",serif;font-style:italic;letter-spacing:.06em}
+  .mono{font-variant-numeric:tabular-nums}
+
+  /* ===== 顶栏 ===== */
+  header{position:sticky;top:0;z-index:50;background:rgba(244,248,252,.94);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+  header::after{content:"";display:block;height:3px;border-top:1px solid var(--line-soft);margin-top:2px}
+  .hwrap{max-width:1480px;margin:0 auto;padding:14px 36px;display:flex;align-items:center;gap:20px}
+  .logo{display:flex;align-items:center;gap:13px}
+  .logo-seal{width:42px;height:42px;border:1.5px solid var(--rose);border-radius:50%;display:grid;place-items:center;font-family:var(--serif);font-size:19px;color:var(--rose);position:relative;flex-shrink:0}
+  .logo-seal::after{content:"";position:absolute;inset:3px;border:1px solid var(--rose);border-radius:50%;opacity:.4}
+  .logo-name{font-family:var(--serif);font-size:21px;font-weight:600;letter-spacing:.14em}
+  .logo-sub{font-size:10px;color:var(--ink3);letter-spacing:.3em;margin-top:3px}
+  .logo-sub .en{font-size:11px;letter-spacing:.12em}
+  .hright{margin-left:auto;display:flex;align-items:center;gap:10px}
+  .search{display:flex;align-items:center;gap:8px;background:var(--paper2);border:1px solid var(--line);border-radius:999px;padding:9px 16px;width:250px;transition:border-color .2s}
+  .search:focus-within{border-color:var(--rose)}
+  .search input{border:none;background:none;width:100%;font-size:12.5px}
+  .search input::placeholder{color:var(--ink3)}
+  .btn{display:inline-flex;align-items:center;gap:7px;padding:9px 17px;border-radius:999px;font-size:12.5px;letter-spacing:.05em;transition:all .2s;border:1px solid transparent;white-space:nowrap}
+  .btn-ghost{border-color:var(--line);color:var(--ink2)}
+  .btn-ghost:hover{border-color:var(--rose);color:var(--rose)}
+  .btn-rose{background:var(--rose);color:#F7FAFD}
+  .btn-rose:hover{background:var(--rose-deep)}
+  .btn-ink{background:var(--ink);color:var(--paper)}
+  .btn-ink:hover{background:#52473D}
+
+  /* ===== 布局 ===== */
+  .shell{max-width:1480px;margin:0 auto;display:grid;grid-template-columns:330px 1fr;gap:0;align-items:start}
+  aside{padding:26px 24px 50px;border-right:1px solid var(--line-soft);position:sticky;top:73px;max-height:calc(100vh - 73px);overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--line) transparent}
+  main{padding:30px 38px 70px;min-width:0}
+
+  /* ===== 左侧引言 ===== */
+  .aside-note{font-family:var(--serif);font-size:12px;color:var(--ink3);line-height:2;letter-spacing:.06em;margin-bottom:20px;padding-left:12px;border-left:2px solid var(--rose-soft)}
+  .aside-note .en{display:block;font-size:11px;color:var(--rose);margin-top:4px}
+
+  /* ===== 日历 ===== */
+  .cal{background:var(--paper2);border:1px solid var(--line);border-radius:6px;padding:16px 15px 12px;position:relative}
+  .cal::before{content:"";position:absolute;top:-8px;left:50%;transform:translateX(-50%) rotate(-2deg);width:76px;height:20px;background:rgba(110,147,181,.16);border-left:1px dashed rgba(110,147,181,.32);border-right:1px dashed rgba(110,147,181,.32)}
+  .cal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+  .cal-ym{display:flex;align-items:baseline;gap:8px}
+  .cal-ym select{border:none;background:none;font-family:var(--serif);font-size:17px;font-weight:600;cursor:pointer;padding:1px}
+  .cal-ym select:last-child{font-size:13px;color:var(--ink2);font-weight:400}
+  .cal-nav{display:flex;gap:3px}
+  .cal-nav button{width:24px;height:24px;display:grid;place-items:center;color:var(--ink3);border-radius:50%;transition:.15s}
+  .cal-nav button:hover{background:var(--rose-soft);color:var(--rose)}
+  .cal-wd{display:grid;grid-template-columns:repeat(7,1fr);margin-bottom:4px}
+  .cal-wd span{text-align:center;font-size:10px;color:var(--ink3);padding:5px 0;letter-spacing:.05em}
+  .cal-days{display:grid;grid-template-columns:repeat(7,1fr);gap:1px}
+  .day{height:33px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:11.5px;color:var(--ink2);border-radius:4px;position:relative;transition:.15s;cursor:pointer}
+  .day:hover{background:var(--rose-soft)}
+  .day.none{color:#BCCBD9;opacity:.65;cursor:default}
+  .day.none:hover{background:none}
+  .day.muted{color:#C6D4E0;pointer-events:none}
+  .day .dot{width:3.5px;height:3.5px;border-radius:50%;background:var(--rose)}
+  .day.has{font-weight:600;color:var(--ink)}
+  .day.today{box-shadow:inset 0 0 0 1px var(--gold)}
+  .day.sel{background:var(--rose);color:#F7FAFD;animation:pop .28s cubic-bezier(.3,1.4,.4,1)}
+  @keyframes pop{0%{transform:scale(.7)}60%{transform:scale(1.14)}100%{transform:scale(1)}}
+  .day.sel .dot{background:#F7FAFD}
+  .cal-foot{display:flex;justify-content:space-between;align-items:center;border-top:1px dashed var(--line);margin-top:10px;padding-top:10px;font-size:11px}
+  .cal-foot button{color:var(--rose);letter-spacing:.05em}
+  .cal-foot button:hover{text-decoration:underline}
+  .cal-foot span{color:var(--ink3)}
+
+  /* ===== 时间轴 ===== */
+  .tl-head{display:flex;align-items:center;justify-content:space-between;margin:26px 0 6px}
+  .tl-title{font-family:var(--serif);font-size:13px;letter-spacing:.2em;color:var(--ink2)}
+  .tl-count{font-size:11px;color:var(--ink3)}
+  .tl-count b{color:var(--rose);font-weight:600}
+  .month-label{display:flex;align-items:center;gap:10px;font-family:var(--serif);font-size:12px;color:var(--ink3);letter-spacing:.1em;margin:18px 0 8px}
+  .month-label::after{content:"";flex:1;height:1px;background:var(--line-soft)}
+  .tl-group{position:relative;padding-left:15px}
+  .tl-group::before{content:"";position:absolute;left:3px;top:6px;bottom:6px;width:1px;background:var(--line)}
+  .tl-item{position:relative;display:flex;gap:9px;align-items:baseline;text-align:left;padding:7px 8px 7px 9px;margin-left:-12px;width:calc(100% + 20px);border-radius:4px;transition:.15s}
+  .tl-item::before{content:"";position:absolute;left:1px;top:13px;width:7px;height:7px;border-radius:50%;background:var(--paper);border:1.5px solid #AFC3D4;transition:.15s}
+  .tl-item:hover{background:var(--paper2)}
+  .tl-item:hover::before{border-color:var(--rose)}
+  .tl-item.active{background:var(--rose-soft)}
+  .tl-item.active::before{background:var(--rose);border-color:var(--rose)}
+  .tl-item .d{font-size:10.5px;color:var(--ink3);width:24px;flex-shrink:0}
+  .tl-item .t{font-size:12.5px;line-height:1.6;color:var(--ink2);flex:1;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .tl-item.active .t{color:var(--rose-deep);font-weight:600}
+  .tl-empty{font-size:12px;color:var(--ink3);line-height:1.9;padding:14px 0}
+  .tl-item{animation:tlIn .45s cubic-bezier(.2,.8,.3,1) both}
+  @keyframes tlIn{from{opacity:0;transform:translateX(-10px)}to{opacity:1;transform:none}}
+  .tl-item::before{width:9px;height:9px;top:12px;left:0;border-width:2px}
+  .tl-item:hover::before{transform:scale(1.25)}
+  .tl-item::before{transition:border-color .15s,transform .2s,background .15s}
+  .tl-item.active::before{animation:pulse 3s ease-out infinite}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(110,147,181,.4)}70%{box-shadow:0 0 0 8px rgba(110,147,181,0)}100%{box-shadow:0 0 0 0 rgba(110,147,181,0)}}
+  .month-label .mc{font-size:10px;color:var(--rose);background:var(--rose-soft);border-radius:999px;padding:1px 8px;letter-spacing:.05em}
+
+  #prog{position:fixed;top:0;left:0;height:2px;width:0;background:linear-gradient(90deg,var(--rose),var(--sage));z-index:90;transition:width .12s linear;border-radius:0 2px 2px 0}
+
+  /* ===== 主区标题 ===== */
+  .main-head{margin-bottom:24px;position:relative}
+  .main-kicker{display:flex;align-items:center;gap:12px;font-size:11px;letter-spacing:.25em;color:var(--rose);margin-bottom:12px}
+  .main-kicker::after{content:"";width:60px;height:1px;background:var(--rose);opacity:.4}
+  .main-title{font-family:var(--serif);font-size:36px;font-weight:600;line-height:1.3;letter-spacing:.02em}
+  .main-title .num{font-family:Georgia,serif;font-style:italic;color:var(--rose);font-weight:400}
+  .main-sub{font-size:12.5px;color:var(--ink3);margin-top:10px;letter-spacing:.04em}
+  .main-sub i{font-style:normal;margin:0 8px;color:var(--line)}
+
+  /* ===== 年份条 ===== */
+  .yearbar{display:flex;align-items:center;gap:4px;flex-wrap:wrap;border-bottom:1px solid var(--line);padding-bottom:14px;margin-bottom:26px}
+  .yr{padding:5px 12px;font-size:12px;color:var(--ink3);border-radius:3px;transition:.2s;letter-spacing:.05em}
+  .yr .n{font-size:10px;opacity:.65;margin-left:3px}
+  .yr:hover{color:var(--rose);background:var(--rose-soft)}
+  .yr.on{background:var(--ink);color:var(--paper);transform:translateY(-1px)}
+  .yr-sep{width:1px;height:12px;background:var(--line);margin:0 8px}
+  .sort-btn{margin-left:auto;font-size:11px;color:var(--ink3);display:flex;align-items:center;gap:5px;padding:5px 10px;border-radius:3px}
+  .sort-btn:hover{color:var(--rose);background:var(--rose-soft)}
+
+  /* ===== 卡片 ===== */
+  .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(268px,1fr));gap:30px 26px}
+  .card{opacity:0;transform:translateY(16px)}
+  .card.in{opacity:1;transform:none;transition:opacity .55s cubic-bezier(.2,.8,.3,1),transform .55s cubic-bezier(.2,.8,.3,1),box-shadow .3s}
+  .card{text-align:left;background:var(--paper2);border:1px solid var(--line-soft);border-radius:5px;padding:12px 12px 16px;display:flex;flex-direction:column;gap:11px;position:relative;box-shadow:0 1px 3px rgba(46,59,71,.05);cursor:pointer}
+  .card.in:hover{transform:translateY(-5px) rotate(-.4deg);box-shadow:0 16px 36px -12px rgba(79,115,150,.25)}
+  .card-img{position:relative;width:100%;aspect-ratio:3/2;overflow:hidden;border-radius:3px;background:#E3EDF5}
+  .card-img img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .7s}
+  .card:hover .card-img img{transform:scale(1.05)}
+  .card-tape{position:absolute;top:-7px;right:18px;width:52px;height:16px;background:rgba(127,163,168,.25);transform:rotate(3deg);z-index:2;border-left:1px dashed rgba(127,163,168,.35);border-right:1px dashed rgba(127,163,168,.35);transition:transform .3s}
+  .card:hover .card-tape{transform:rotate(6deg) translateY(-2px)}
+  .card-tag{position:absolute;bottom:8px;left:8px;background:rgba(253,254,255,.93);font-size:10px;letter-spacing:.15em;padding:3px 9px;border-radius:2px;color:var(--ink2)}
+  .card-date{font-size:10.5px;color:var(--rose);letter-spacing:.14em;padding:0 3px}
+  .card h3{font-family:var(--serif);font-size:17.5px;font-weight:600;line-height:1.5;padding:0 3px;letter-spacing:.01em}
+  .card p{font-size:12.5px;line-height:1.85;color:var(--ink2);padding:0 3px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .card-foot{display:flex;align-items:center;gap:7px;font-size:10.5px;color:var(--ink3);padding:2px 3px 0;margin-top:auto}
+  .card-foot .sep{width:3px;height:3px;border-radius:50%;background:var(--line)}
+
+  .empty{grid-column:1/-1;text-align:center;padding:64px 30px;border:1px dashed var(--line);border-radius:6px;background:var(--paper2)}
+  .empty .t{font-family:var(--serif);font-size:22px;margin-bottom:10px}
+  .empty .s{font-size:12.5px;color:var(--ink3);line-height:1.9}
+  .empty .btn{margin-top:20px}
+
+  /* ===== 页脚 ===== */
+  footer{border-top:1px solid var(--line);margin-top:20px}
+  .fwrap{max-width:1480px;margin:0 auto;padding:26px 36px;display:flex;align-items:center;justify-content:space-between;font-size:11px;color:var(--ink3);letter-spacing:.08em}
+  .fwrap .en{font-size:12px;color:var(--rose)}
+
+  /* ===== 预览 ===== */
+  .ov{position:fixed;inset:0;z-index:100;display:none;background:rgba(46,59,71,.45);backdrop-filter:blur(5px)}
+  .ov.open{display:block;animation:fade .25s}
+  @keyframes fade{from{opacity:0}to{opacity:1}}
+  .sheet{position:absolute;inset:24px;max-width:1360px;margin:0 auto;background:var(--paper);border-radius:8px;overflow:hidden;display:grid;grid-template-columns:1.1fr 1fr;box-shadow:0 30px 80px -20px rgba(46,59,71,.4);animation:up .35s cubic-bezier(.2,.8,.3,1)}
+  @keyframes up{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
+  .sheet-media{background:#E4EDF5;display:grid;place-items:center;position:relative;overflow:hidden}
+  .sheet-media img{max-width:100%;max-height:100%;object-fit:contain;display:block;animation:imgIn .5s ease both}
+  @keyframes imgIn{from{opacity:0}to{opacity:1}}
+  .sheet-media .stamp{position:absolute;top:22px;left:22px;border:1.5px solid rgba(110,147,181,.55);color:var(--rose-deep);border-radius:4px;padding:7px 12px;font-size:11px;letter-spacing:.2em;transform:rotate(-5deg);background:rgba(253,254,255,.75)}
+  .sheet-body{display:flex;flex-direction:column;min-height:0;background:var(--paper2);border-left:1px solid var(--line)}
+  .sheet-top{display:flex;align-items:center;justify-content:space-between;padding:16px 26px;border-bottom:1px solid var(--line-soft)}
+  .sheet-top .k{font-size:10px;letter-spacing:.3em;color:var(--ink3)}
+  .xbtn{width:32px;height:32px;border:1px solid var(--line);border-radius:50%;display:grid;place-items:center;color:var(--ink2);transition:.2s}
+  .xbtn:hover{border-color:var(--rose);color:var(--rose);transform:rotate(90deg)}
+  .sheet-scroll{flex:1;overflow-y:auto;padding:28px 34px;min-height:0;scrollbar-width:thin;scrollbar-color:var(--line) transparent}
+  .s-date{font-family:Georgia,serif;font-style:italic;font-size:14px;color:var(--rose);letter-spacing:.1em;margin-bottom:14px}
+  .s-title{font-family:var(--serif);font-size:27px;font-weight:600;line-height:1.5;margin-bottom:18px}
+  .s-meta{display:flex;flex-wrap:wrap;gap:14px;font-size:11px;color:var(--ink3);padding-bottom:18px;border-bottom:1px solid var(--line-soft);margin-bottom:22px}
+  .s-meta b{color:var(--ink2);font-weight:500;margin-left:5px}
+  .s-body{font-size:14px;line-height:2.15;color:#46586B;letter-spacing:.02em}
+  .s-extra{margin-top:6px}
+  .s-extra figure{margin:16px 0 0}
+  .s-extra img{width:100%;border-radius:4px;border:1px solid var(--line-soft);display:block}
+  .s-body p{margin-bottom:18px}
+  .s-body p:first-child::first-letter{font-family:var(--serif);font-size:40px;float:left;line-height:1.1;padding:4px 10px 0 0;color:var(--rose);font-weight:600}
+  .s-body blockquote{margin:24px 0;padding:4px 0 4px 18px;border-left:2px solid var(--rose);font-family:var(--serif);font-size:15.5px;line-height:2;color:var(--ink)}
+  .s-tags{display:flex;flex-wrap:wrap;gap:7px;margin-top:26px;padding-top:20px;border-top:1px dashed var(--line)}
+  .s-tags span{font-size:10.5px;color:var(--ink2);border:1px solid var(--line);border-radius:999px;padding:4px 12px;letter-spacing:.05em}
+  .s-nav{display:flex;gap:10px;padding:14px 26px;border-top:1px solid var(--line-soft);background:var(--paper)}
+  .s-nav .btn{flex:1;justify-content:center}
+  .s-nav .btn:disabled{opacity:.35;cursor:default}
+  .s-nav .idx{align-self:center;font-size:11px;color:var(--ink3);min-width:56px;text-align:center}
+
+  .toast{position:fixed;left:50%;bottom:36px;transform:translate(-50%,14px);background:var(--ink);color:var(--paper2);font-size:12.5px;padding:12px 24px;border-radius:999px;z-index:200;opacity:0;pointer-events:none;transition:.25s;letter-spacing:.05em;box-shadow:0 10px 30px -8px rgba(46,59,71,.4)}
+  .toast.on{opacity:1;transform:translate(-50%,0)}
+
+  /* ===== 响应式 ===== */
+  @media(max-width:1060px){
+    .shell{display:flex;flex-direction:column}
+    aside{position:static;max-height:none;border-right:none;border-top:1px solid var(--line-soft);order:2;width:100%}
+    main{order:1;width:100%}
+    .sheet{grid-template-columns:1fr;grid-template-rows:38vh 1fr;inset:12px}
+    .sheet-body{border-left:none;border-top:1px solid var(--line)}
+  }
+  @media(max-width:680px){
+    .hwrap{padding:12px 16px;flex-wrap:wrap;gap:10px}
+    .hright{width:100%;flex-wrap:wrap}
+    .search{flex:1;min-width:150px;width:auto}
+    main{padding:20px 16px 46px}
+    aside{padding:20px 16px 30px}
+    .main-title{font-size:25px}
+    .cards{grid-template-columns:1fr;gap:22px}
+    .card h3{font-size:16px}
+    .sheet-scroll{padding:20px 18px}
+    .s-title{font-size:21px}
+    .s-nav{flex-wrap:wrap;justify-content:center;gap:8px;padding:10px 14px}
+    .s-nav .idx{order:-1;width:100%}
+    .s-body{font-size:13.5px;line-height:2}
+    .fwrap{flex-direction:column;gap:10px;text-align:center;padding:20px 16px}
+    .toast{max-width:82vw;text-align:center}
+  }
+</style>
+</head>
+<body>
+  <div id="prog"></div>
+
+<header>
+  <div class="hwrap">
+    <div class="logo">
+      <div class="logo-seal">花</div>
+      <div>
+        <div class="logo-name">花信手帖</div>
+        <div class="logo-sub">日々の記録 · <span class="en">a quiet archive</span></div>
+      </div>
+    </div>
+    <div class="hright">
+      <label class="search">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="#8FA1B3" stroke-width="1.7"/><path d="M16.5 16.5 21 21" stroke="#8FA1B3" stroke-width="1.7" stroke-linecap="round"/></svg>
+        <input id="q" type="search" placeholder="搜标题、正文、地点、标签…" autocomplete="off"/>
+      </label>
+      <button class="btn btn-ghost" id="btnToday">今天</button>
+      <button class="btn btn-rose" id="btnRandom">随手翻一页</button>
+    </div>
+  </div>
+</header>
+
+<div class="shell">
+  <aside>
+    <div class="aside-note">
+      把值得留下的日子，<br/>一朵一朵夹进手帖里。
+      <span class="en">every day, a pressed flower.</span>
+    </div>
+
+    <div class="cal">
+      <div class="cal-head">
+        <div class="cal-ym">
+          <select id="selY" aria-label="年份"></select>
+          <select id="selM" aria-label="月份"></select>
+        </div>
+        <div class="cal-nav">
+          <button id="prevM" aria-label="上月"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M15 5l-7 7 7 7" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+          <button id="nextM" aria-label="下月"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M9 5l7 7-7 7" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        </div>
+      </div>
+      <div class="cal-wd"><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span><span>日</span></div>
+      <div class="cal-days" id="days"></div>
+      <div class="cal-foot">
+        <button id="clearDay">看整月 →</button>
+        <span id="jumpStat"></span>
+      </div>
+    </div>
+
+    <div class="tl-head">
+      <div class="tl-title">时间轴</div>
+      <div class="tl-count" id="railCount"></div>
+    </div>
+    <div id="railList"></div>
+  </aside>
+
+  <main>
+    <div class="main-head">
+      <div class="main-kicker">ARCHIVE <span class="en" style="letter-spacing:.05em">/ by date</span></div>
+      <h1 class="main-title" id="h1"></h1>
+      <div class="main-sub" id="sub"></div>
+    </div>
+    <div class="yearbar" id="yearbar"></div>
+    <div class="cards" id="cards"></div>
+  </main>
+</div>
+
+<footer>
+  <div class="fwrap">
+    <span>花信手帖 · 一个安静的记录库</span>
+    <span class="en">slowly, gently, keep the days.</span>
+  </div>
+</footer>
+
+<!-- 预览 -->
+<div class="ov" id="ov">
+  <div class="sheet">
+    <div class="sheet-media">
+      <img id="ovImg" alt=""/>
+      <div class="stamp" id="ovStamp"></div>
+    </div>
+    <div class="sheet-body">
+      <div class="sheet-top">
+        <span class="k">一頁 / PREVIEW</span>
+        <button class="xbtn" id="ovClose" aria-label="关闭"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></button>
+      </div>
+      <div class="sheet-scroll" id="ovScroll">
+        <div class="s-date" id="ovDate"></div>
+        <h2 class="s-title" id="ovTitle"></h2>
+        <div class="s-meta" id="ovMeta"></div>
+        <div class="s-body" id="ovBody"></div>
+        <div class="s-extra" id="ovExtra"></div>
+        <div class="s-tags" id="ovTags"></div>
+      </div>
+      <div class="s-nav">
+        <button class="btn btn-ghost" id="ovPrev">← 上一页</button>
+        <span class="idx" id="ovIdx"></span>
+        <button class="btn btn-ghost" id="ovCopy">复制文案</button>
+        <button class="btn btn-ink" id="ovNext">下一页 →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ================================================================
+   纯展示版数据（只能看，不能改）
+   把这里的数据替换成你自己的即可
+   ================================================================ */
+const SEED = [
+  { id:"cangjie", date:"1976-05-08", tag:"技术", title:"仓颉输入法第一版手稿",
+    summary:"朱邦复在台北完成第一套拆字规则，把汉字拆成 24 个基本字形，此后中文才有了「打得比写得快」的入口。",
+    body:["这份手稿共 42 页，用蓝色圆珠笔写在方格纸上，页脚有反复涂改的痕迹。第一页顶端写着一行字：「字形可拆，则文字可数」。","朱邦复当时把汉字拆成 24 个基本字形，对应 26 个拉丁字母键盘。为了验证可行性，他先手工统计了常用字的拆法，再逐个校对手写速度。据同僚回忆，他一天要抄写八千字。","1978 年仓颉输入法正式公开，五年后无偿放弃专利。今天我们在键盘上敲出的每一个汉字，源头都可以追到这几页纸上。"],
+    place:"台北 · 朱邦复工作室", source:"影印自手稿第一册", img:"" },
+  { id:"shinjuku", date:"1976-05-12", tag:"照片", title:"新宿站前的最后一班车",
+    summary:"夜间最后一班电车开出后，站前的人行道还留着白天的热度。摄影师在同一个机位等了四个晚上。",
+    body:["照片用 35mm 富士负片拍摄，快门 1/15 秒，所以人群是模糊的。右边那个人影站得特别直，手里拎着一个纸袋。","据拍摄者日记：「第四夜终于等到空下来的三十秒。有个人回头看了我一眼，我却按下快门后才发现。」","这张照片后来被用作 1979 年一本城市摄影集的开篇，编辑说选它的原因是「它不留住任何人，只留住了光」。"],
+    place:"东京 · 新宿站东口", source:"城市摄影集 · 1979", img:"" },
+  { id:"voyager", date:"1977-08-20", tag:"技术", title:"旅行者号金唱片封套的初稿",
+    summary:"115 张图片、90 分钟音乐、55 种语言的问候。封面上刻着一个播放转速的图示，因为外星人可能不认识「33 转」。",
+    body:["封套是镀金的铜盘，封面刻图用蚀刻工艺。设计者卡尔·萨根坚持要把「如何播放」画在盘上：一个圆盘、一根唱针、一个转速换算的二进制图示。","收录的音乐里有一首中国古琴曲《流水》，全长七分三十七秒。负责选曲的团队说，选它是因为「它的开头像水，结尾像时间」。","档案中保存的是第 3 稿，前两稿因为图案过于复杂被推翻。旁边一行铅笔备注：「假设他们没有眼睛呢？」"],
+    place:"帕萨迪纳 · JPL", source:"封套设计第三稿", img:"" },
+  { id:"crash", date:"1987-10-19", tag:"事件", title:"黑色星期五，市场在两小时内失去四分之一",
+    summary:"道琼斯指数单日下跌 22.6%，是历史上最大的单日百分比跌幅。交易员把电话摔在了桌上。",
+    body:["开盘后不到半小时，自动程序交易开始连环触发卖出指令，成交量放大到电话线路全部占满。多位交易员回忆「报不出价」，因为没人知道该报多少。","当天收盘后，纽约证券交易所首次启动了交易暂停机制。此后三十多年里，「熔断」成为全球市场的标准配置。","档案里留下的不是数字，而是一张张手写的成交单——那天纸质凭单的量是平常的六倍，清算系统延迟了整整三天。"],
+    place:"纽约 · 华尔街", source:"交易结算单存根", img:"" },
+  { id:"kodak", date:"1994-03-02", tag:"器物", title:"柯达 CCD 原型机",
+    summary:"一台 130 万像素的方盒子，重 3.8 公斤，存一张照片要 2.5 秒。它后来杀死了自己的公司。",
+    body:["机身上贴着一张手写标签：「试验样机 No.7，请勿外借」。取景器是光学旁轴，背面的液晶屏只有 2 英寸。","工程师的描述：「电池能撑 25 分钟。为了演示，我们得提前充好三块备用，把它们放进一个保温袋里。」","柯达在 1975 年就做出了世界上第一台数码相机，却把它锁进抽屉十年。这张照片拍的就是那把抽屉的钥匙。"],
+    place:"罗切斯特 · 柯达实验室", source:"内部试验记录 No.7", img:"" },
+  { id:"handover", date:"1997-06-30", tag:"事件", title:"零点前二十分钟的交接备忘录",
+    summary:"一张 A4 纸，七行字，最后一行写着「以上事项均已核对，确认无误」，签名处有雨水晕开的痕迹。",
+    body:["备忘录是用钢笔写的，横格纸。第一行是设备清单，第二行是人员名单，第三行开始是交接流程的时间点，精确到分钟。","最后一行签名下方，有人补了一句手写的话：「今夜有雨，记得带伞。」这句不属于任何流程。","这份文件在档案里被归为「程序性文件」，但它常常被拿来做展览的主视觉——因为它同时是一个句号和一个逗号。"],
+    place:"香港", source:"交接文件存根", img:"" },
+  { id:"ipod", date:"2001-10-23", tag:"器物", title:"第一代 iPod 的工程样机",
+    summary:"比最终版本厚 4 毫米，滚轮是塑料的而不是金属。发布前两周，它被换掉了。",
+    body:["样机背面没有任何激光刻字，只有一个手写的灰色编号。电池仓可以打开，方便工程师换电池做连续播放测试。","测试记录显示：连续播放 10 小时 12 分钟后关机，低于目标值 30 分钟。团队最后用一块更大的电池解决了它，代价是厚度增加 1.2 毫米。","这台样机原本应该被销毁，但一位工程师把它留了下来。他在 2014 年接受采访时说：「我知道它会成为一本教科书。」"],
+    place:"库比蒂诺", source:"工程样机存档", img:"" },
+  { id:"maplemoon", date:"2004-11-06", tag:"手记", title:"枫桥夜泊，我在船上读了一夜",
+    summary:"不是古迹考察，只是一次普通的夜航。船到桥下时，我关掉了所有光源。",
+    body:["船老大说，这一段的桥墩是 90 年代重修的，原来的石料被搬去了博物馆。他指给我看水面上的一块反光，说那就是原来桥的位置。","我把手电关了。黑暗里能听见三种声音：水声、远处工地的打桩声、以及自己心跳。古人写「夜半钟声到客船」，这里的钟声早就没有了。","笔记本上那天只写了一句话：「月亮是唯一没有修缮过的古迹。」"],
+    place:"苏州 · 枫桥", source:"夜航手记", img:"" },
+  { id:"gmail", date:"2004-04-01", tag:"技术", title:"Gmail 发布的那天，所有人都以为是玩笑",
+    summary:"1GB 免费空间，在当时是竞品的 500 倍。发布选在愚人节，因此很多人以为它不存在。",
+    body:["公告只有一页，连商标都是临时画的。几位早期用户回忆：「我们注册了，然后等了三天，才相信它真的能收邮件。」","更早的版本内部代号是「Caribou」，测试期内每位员工都被要求每天发一封真实邮件以验证系统压力。","这页截图来自第一版界面，右下角还有一个「Loading…」的字样，因为当时还没有做异步加载。"],
+    place:"山景城", source:"发布页截图", img:"" },
+  { id:"apple2", date:"2007-06-29", tag:"器物", title:"被拆开的 Apple II，和一个签名",
+    summary:"机箱内侧有一行马克笔字迹：「To the next one. — W.」三十年没人知道 W 是谁。",
+    body:["这台机器的主人在二手市场买到它，拆开清灰时发现了这行字。字迹位置在内侧右上方，不打开机箱永远看不到。","主板是 1978 年批次，内存已经扩到 48KB。电源部分有一处手工补焊，焊点很漂亮。","关于 W 的身份，至今没有结论。有人猜是装配线上的检验员，也有人猜是这第一台机器的第一任主人。"],
+    place:"加州 · 帕洛阿尔托", source:"私人收藏 · 内部铭文", img:"" },
+  { id:"olympic", date:"2021-07-23", tag:"事件", title:"没有观众的开幕式",
+    summary:"能容纳 6.8 万人的体育场里，只有不到 1000 人。掌声回音比欢呼更响。",
+    body:["场内声音被严格控制，连运动员入场的音乐都调低了 6 分贝。转播导演后来说，这是职业生涯里最难的一次切换——「你找不到任何一张情绪饱满的观众脸。」","运动员入场时，很多人对着空看台挥手。有一支代表队把手机举起来，对着看台拍了一段视频。","这一页收的是现场工作证与一张空座位的照片。座位号是 214，没人坐。"],
+    place:"东京 · 国立竞技场", source:"现场工作证存档", img:"" },
+  { id:"mildseven", date:"2022-09-15", tag:"照片", title:"一张广告的取景地，三十年后",
+    summary:"90 年代那组著名的海岸广告，拍摄地在北海道西岸。同一个机位，现在长满了防风林。",
+    body:["原片是一张 4×5 大画幅彩色正片，色彩偏冷。摄影师在同一个机位待了十一天，只为了等一场没有云的天气。","三十年后再去，海岸线往后退了大概四十米，防风林长到了三米高。当地人说，是 2004 年那场台风之后开始种树的。","两张照片并排放时，能看出海的位置变了，而地平线没变。"],
+    place:"北海道 · 西海岸", source:"取景地对照记录", img:"" },
+  { id:"cafe", date:"2023-03-18", tag:"手记", title:"街角咖啡馆的第五张桌子",
+    summary:"我在同一个位置坐了两年，靠窗，能看见整条巷子的进出。店主从来不问我要什么。",
+    body:["第五张桌子有点晃，需要垫一张折起来的纸巾。我垫了两年，纸巾换了大概一百四十张。","常客里有三个人我认识，但没说过话：一个每天下午三点来的老先生，一个带笔记本电脑的女生，还有一只总在门口趴着的橘猫。","店要转让了。最后一天，我在纸巾上写了一句话，塞进桌脚的缝里。"],
+    place:"上海 · 永康路", source:"手记本 · 第 62 页", img:"" },
+  { id:"winter", date:"2024-12-21", tag:"手记", title:"冬至那天，雪下了一整个下午",
+    summary:"下午三点半天就黑了。楼下的路灯先亮起来，雪落在灯光里，像有人在往下撒碎纸。",
+    body:["我在窗边站了四十分钟，什么也没做。中间煮了一壶水，忘了喝，凉了。","邻居家的孩子在楼下堆了一个很小的雪人，不到三十厘米高，用的是一颗黑葡萄做眼睛。","晚上八点，雪停了。雪人还在。第二天早上只剩下地上一个浅浅的印子。"],
+    place:"杭州 · 拱墅", source:"手记本 · 第 88 页", img:"" },
+  { id:"letter", date:"2025-08-09", tag:"手记", title:"一封写了三遍都没寄出的信",
+    summary:"第一遍太长，第二遍太客气，第三遍只写了六行。最后我把它夹在了一本书里。",
+    body:["信纸是旧的，边缘有点发黄。第三遍的六行里，有四行在说天气，剩下一行是一个问题，最后一行是「算了」。","夹进去的那本书是《城南旧事》，第 47 页。如果有人翻到那里，会看见一张对折过两次的信纸。","这大概是一种很笨的投递方式：寄给一个可能永远不会打开这本书的人。"],
+    place:"南京 · 鼓楼", source:"私人信件", img:"" }
+];
+
+/* ============ 和纸风插画生成 ============ */
+const PALETTES = [
+  ["#D5E4EF","#6E93B5","#F7FAFD"],["#D8E9E8","#7FA3A8","#F5FAF9"],
+  ["#DCE6F2","#5F83A8","#F6F9FC"],["#D0E0EA","#8FA9BF","#F8FBFD"],
+  ["#DDE8F0","#7B98B0","#F7FAFC"],["#D2E4EE","#4F7396","#F4F9FC"],
+];
+function hashStr(s){let h=0;for(let i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))>>>0;return h}
+function artFor(item){
+  const h=hashStr(item.id+item.title);
+  const [c1,c2,c3]=PALETTES[h%PALETTES.length];
+  const motif=h%5;
+  let deco="";
+  if(motif===0){
+    deco=`<path d="M840 640 Q800 420 880 260" stroke="${c2}" stroke-width="3" fill="none" opacity=".55"/>
+    ${[0,1,2,3,4].map(i=>`<ellipse cx="${852-i*8}" cy="${300+i*70}" rx="26" ry="12" fill="${c2}" opacity="${.2+i*.1}" transform="rotate(${-30+i*12} ${852-i*8} ${300+i*70})"/>`).join("")}
+    <circle cx="880" cy="248" r="20" fill="${c1}"/><circle cx="880" cy="248" r="8" fill="${c2}" opacity=".6"/>`;
+  }else if(motif===1){
+    deco=`<circle cx="790" cy="290" r="120" fill="${c2}" opacity=".75"/>
+    <path d="M520 640 Q700 460 860 640 Z" fill="${c2}" opacity=".18"/>
+    <path d="M660 640 Q840 500 1020 640 Z" fill="${c2}" opacity=".3"/>`;
+  }else if(motif===2){
+    deco=[0,1,2,3,4,5].map(i=>`<ellipse cx="800" cy="330" rx="46" ry="130" fill="none" stroke="${c2}" stroke-width="1.6" opacity=".5" transform="rotate(${i*30} 800 330)"/>`).join("")+
+    `<circle cx="800" cy="330" r="16" fill="${c2}" opacity=".65"/>`;
+  }else if(motif===3){
+    deco=[0,1,2,3,4].map(i=>`<path d="M480 ${330+i*52} q60 -34 120 0 t120 0 t120 0 t120 0" stroke="${c2}" stroke-width="2" fill="none" opacity="${.5-i*.08}"/>`).join("");
+  }else{
+    deco=[0,1,2,3].map(i=>`<rect x="${560+i*110}" y="240" width="70" height="70" fill="none" stroke="${c2}" stroke-width="1.4" opacity=".4"/>`).join("")+
+    `<circle cx="835" cy="475" r="34" fill="${c2}" opacity=".6"/><rect x="560" y="350" width="70" height="70" fill="${c1}" opacity=".8"/>`;
+  }
+  const caption=(item.tag||"記録");
+  const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="720" viewBox="0 0 1080 720">
+  <rect width="1080" height="720" fill="${c3}"/>
+  <defs><pattern id="w" width="5" height="5" patternUnits="userSpaceOnUse"><circle cx="1" cy="1" r=".6" fill="${c2}" opacity=".12"/></pattern></defs>
+  <rect x="24" y="24" width="1032" height="672" fill="none" stroke="${c2}" stroke-opacity=".25"/>
+  ${deco}<rect width="1080" height="720" fill="url(#w)"/>
+  <text x="64" y="96" font-family="serif" font-size="24" fill="${c2}" letter-spacing="8">${caption}</text>
+  <line x1="64" y1="120" x2="150" y2="120" stroke="${c2}" stroke-opacity=".5"/>
+  <text x="64" y="636" font-family="serif" font-size="40" fill="${c2}" letter-spacing="3">${item.title.replace(/&/g,"&amp;").replace(/</g,"&lt;").slice(0,14)}</text>
+  <text x="64" y="678" font-family="Georgia,serif" font-style="italic" font-size="20" fill="${c2}" opacity=".7">${item.date}</text>
+  </svg>`;
+  return "data:image/svg+xml;charset=utf-8,"+encodeURIComponent(svg);
+}
+function imgOf(item){return item.img || (item.imgs && item.imgs[0]) || artFor(item)}
+
+/* ============ 状态 ============ */
+const DATA = JSON.parse(JSON.stringify(SEED)); // 锁定为只读
+
+const state={year:null,month:null,day:null,query:"",sortAsc:true,currentList:[],currentIndex:-1};
+const el=id=>document.getElementById(id);
+const pad=n=>String(n).padStart(2,"0");
+const toKey=(y,m,d)=>`${y}-${pad(m)}-${pad(d)}`;
+const parseKey=k=>{const[y,m,d]=k.split("-").map(Number);return{y,m,d}};
+const WEEK=["周日","周一","周二","周三","周四","周五","周六"];
+const esc=s=>String(s??"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+
+let sorted=[],byDate={},years=[];
+function reindex(){
+  sorted=[...DATA].sort((a,b)=>a.date.localeCompare(b.date));
+  byDate={};sorted.forEach(i=>{(byDate[i.date]=byDate[i.date]||[]).push(i)});
+  years=[...new Set(sorted.map(i=>+i.date.slice(0,4)))].sort((a,b)=>a-b);
+}
+
+function toast(msg){const t=el("toast");t.textContent=msg;t.classList.add("on");clearTimeout(t._tm);t._tm=setTimeout(()=>t.classList.remove("on"),2200)}
+function matches(item,q){
+  if(!q)return true;
+  return [item.title,item.summary,(item.body||[]).join(""),item.tag,item.place,item.source,item.date].join(" ").toLowerCase().includes(q.toLowerCase());
+}
+
+/* ============ 日历 ============ */
+function latestMonthInYear(y){let m=0;for(const i of sorted)if(+i.date.slice(0,4)===y)m=Math.max(m,+i.date.slice(5,7));return m||1}
+function lastEntryYM(){if(!sorted.length)return null;const t=sorted[sorted.length-1].date;return{y:+t.slice(0,4),m:+t.slice(5,7)}}
+function renderPicker(){
+  let vy=state.year,vm=state.month;
+  if(vy!==null&&!vm)vm=latestMonthInYear(vy);
+  if(vy===null){const t=lastEntryYM();if(t){vy=t.y;vm=t.m}else{const n=new Date();vy=n.getFullYear();vm=n.getMonth()+1}}
+
+  el("selY").innerHTML=`<option value="all">全部年份</option>`+years.map(y=>`<option value="${y}" ${y===state.year?"selected":""}>${y} 年</option>`).join("");
+  el("selY").value=state.year===null?"all":state.year;
+  el("selM").innerHTML=[...Array(12)].map((_,i)=>`<option value="${i+1}" ${i+1===vm?"selected":""}>${i+1} 月</option>`).join("");
+  el("selM").value=vm;
+
+  const box=el("days");
+  const first=new Date(vy,vm-1,1);
+  const startPad=(first.getDay()+6)%7;
+  const dim=new Date(vy,vm,0).getDate();
+  const prevDim=new Date(vy,vm-1,0).getDate();
+  const now=new Date(),todayKey=toKey(now.getFullYear(),now.getMonth()+1,now.getDate());
+  let html="";
+  for(let i=startPad-1;i>=0;i--)html+=`<div class="day muted">${prevDim-i}</div>`;
+  for(let d=1;d<=dim;d++){
+    const key=toKey(vy,vm,d);
+    const dayItems=byDate[key]||[];
+    const has=dayItems.some(item=>matches(item,state.query));
+    const isToday=key===todayKey;
+    const sel=state.day===d&&state.year===vy&&state.month===vm;
+    if(!has){
+      html+=`<div class="day none${isToday?" today":""}">${d}</div>`;
+      continue;
+    }
+    html+=`<div class="day has${isToday?" today":""}${sel?" sel":""}" data-d="${d}" role="button" tabindex="0">${d}<span class="dot"></span></div>`;
+  }
+  const rest=(7-((startPad+dim)%7))%7;
+  for(let i=1;i<=rest;i++)html+=`<div class="day muted">${i}</div>`;
+  box.innerHTML=html;
+  box.querySelectorAll(".day[data-d]").forEach(n=>{
+    const pick=()=>{const d=+n.dataset.d;state.year=vy;state.month=vm;state.day=state.day===d?null:d;renderAll()};
+    n.onclick=pick;
+    n.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();pick()}};
+  });
+  const mc=sorted.filter(i=>i.date.startsWith(`${vy}-${pad(vm)}`)).length;
+  el("jumpStat").textContent=state.day?`当日 ${(byDate[toKey(vy,vm,state.day)]||[]).length} 页`:`本月 ${mc} 页`;
+  el("clearDay").style.visibility=state.day?"visible":"hidden";
+}
+
+/* ============ 年份条 ============ */
+function renderYearbar(){
+  const counts={};sorted.forEach(i=>{const y=i.date.slice(0,4);counts[y]=(counts[y]||0)+1});
+  el("yearbar").innerHTML=
+    `<button class="yr ${state.year===null?"on":""}" data-y="all">全部<span class="n">${DATA.length}</span></button><div class="yr-sep"></div>`+
+    years.map(y=>`<button class="yr ${state.year===y?"on":""}" data-y="${y}">${y}<span class="n">${counts[y]||0}</span></button>`).join("")+
+    `<button class="sort-btn" id="sortBtn">${state.sortAsc?"由远及近 ↓":"由近及远 ↑"}</button>`;
+  el("yearbar").querySelectorAll(".yr").forEach(b=>{
+    b.onclick=()=>{const v=b.dataset.y;
+      if(v==="all"){state.year=null;state.month=null;state.day=null}
+      else{state.year=+v;state.month=null;state.day=null}
+      renderAll()};
+  });
+  el("sortBtn").onclick=()=>{state.sortAsc=!state.sortAsc;renderYearbar();renderRail();renderMain()};
+}
+
+/* ============ 左侧时间轴 ============ */
+function renderRail(){
+  const q=state.query.trim(),box=el("railList");
+  const list=sorted.filter(i=>{
+    if(state.year!==null&&+i.date.slice(0,4)!==state.year)return false;
+    if(state.month&&+i.date.slice(5,7)!==state.month)return false;
+    return matches(i,q);
+  });
+  el("railCount").innerHTML=q?`命中 <b>${list.length}</b> / ${DATA.length}`:`共 <b>${DATA.length}</b> 页`;
+  if(!list.length){box.innerHTML=`<div class="tl-empty">这一段时间里还没有手帖。<br/>试试放大年份，或清空搜索。</div>`;return}
+  const ordered=state.sortAsc?list:[...list].reverse();
+  const groups={};ordered.forEach(i=>{const k=i.date.slice(0,7);(groups[k]=groups[k]||[]).push(i)});
+  box.innerHTML=Object.keys(groups).map(k=>{
+    const[y,m]=k.split("-");
+    return `<div class="month-label">${y} · ${+m} 月<span class="mc">${groups[k].length} 页</span></div><div class="tl-group">`+
+      groups[k].map(item=>{
+        const d=+item.date.slice(8);
+        const act=(state.day===d&&state.year===+y&&state.month===+m)?" active":"";
+        return `<button class="tl-item${act}" data-id="${esc(item.id)}"><span class="d mono">${pad(d)}</span><span class="t">${esc(item.title)}</span></button>`;
+      }).join("")+`</div>`;
+  }).join("");
+  const items=box.querySelectorAll(".tl-item");
+  items.forEach((b,i)=>{b.style.animationDelay=Math.min(i*32,420)+"ms"});
+  items.forEach(b=>{
+    b.onclick=()=>{
+      const item=DATA.find(i=>i.id===b.dataset.id);if(!item)return;
+      const p=parseKey(item.date);
+      state.year=p.y;state.month=p.m;state.day=p.d;
+      renderAll();openPreview(item.id);
+    };
+  });
+  const act=box.querySelector(".tl-item.active");
+  if(act)try{act.scrollIntoView({block:"nearest"})}catch(e){}
+}
+
+/* ============ 主区 ============ */
+function currentScope(){
+  const q=state.query.trim();
+  let list=sorted.filter(i=>{
+    if(state.year!==null&&+i.date.slice(0,4)!==state.year)return false;
+    if(state.month&&+i.date.slice(5,7)!==state.month)return false;
+    if(state.month&&state.day)return +i.date.slice(8)===state.day;
+    return true;
+  }).filter(i=>matches(i,q));
+  return state.sortAsc?list:[...list].reverse();
+}
+function renderMain(){
+  const list=currentScope();state.currentList=list;
+  const q=state.query.trim();
+  let h1,sub;
+  if(state.year===null){h1=`全部手帖 <span class="num">${list.length}</span>`;sub=years.length?`${years[0]} — ${years[years.length-1]}，慢慢翻。`:""}
+  else if(!state.month){h1=`<span class="num">${state.year}</span> 年 <span class="num">${list.length}</span>`;sub="这一年的所有记录"}
+  else if(!state.day){h1=`<span class="num">${state.year}</span> 年 ${state.month} 月 <span class="num">${list.length}</span>`;sub="整月视图 · 点日历上的日子可只看当天"}
+  else{
+    const wd=WEEK[new Date(state.year,state.month-1,state.day).getDay()];
+    h1=`${state.year} 年 ${state.month} 月 <span class="num">${state.day}</span> 日`;
+    sub=`${wd}<i>|</i>当日共 ${list.length} 页`;
+  }
+  el("h1").innerHTML=h1;
+  el("sub").innerHTML=q?`${sub}<i>|</i>搜索「${esc(q)}」`:sub;
+
+  const cards=el("cards");
+  if(!list.length){
+    cards.innerHTML=`<div class="empty"><div class="t">这里还空着</div><div class="s">这一段时间里还没有手帖。</div>
+      <button class="btn btn-ghost" id="emptyReset">回到全部</button></div>`;
+    el("emptyReset").onclick=()=>{state.year=null;state.month=null;state.day=null;state.query="";el("q").value="";renderAll()};
+    return;
+  }
+  cards.innerHTML=list.map(item=>`
+    <div class="card" data-id="${esc(item.id)}" role="button" tabindex="0">
+      <div class="card-tape"></div>
+      <div class="card-img"><span class="card-tag">${esc(item.tag||"記録")}</span><img src="${imgOf(item)}" alt="${esc(item.title)}" loading="lazy"/></div>
+      <div class="card-date mono">${item.date.replace(/-/g," . ")}</div>
+      <h3>${esc(item.title)}</h3>
+      <p>${esc(item.summary)}</p>
+      <div class="card-foot"><span>${esc(item.place||"")}</span><span class="sep"></span><span>${esc(item.source||"")}</span></div>
+    </div>`).join("");
+  cards.querySelectorAll(".card").forEach(node=>{
+    node.onclick=()=>openPreview(node.dataset.id);
+    node.onkeydown=e=>{if(e.key==="Enter")openPreview(node.dataset.id)};
+  });
+  revealCards(cards);
+}
+function revealCards(cards){
+  const nodes=cards.querySelectorAll(".card");
+  if(!("IntersectionObserver" in window)){nodes.forEach(n=>n.classList.add("in"));return}
+  const io=new IntersectionObserver(es=>{
+    es.forEach(en=>{if(en.isIntersecting){
+      const n=en.target;
+      if(n.dataset.seen){n.classList.add("in");io.unobserve(n);return}
+      n.dataset.seen="1";
+      const d=+n.dataset.dd||0;
+      setTimeout(()=>n.classList.add("in"),d);
+      io.unobserve(n);
+    }});
+  },{threshold:.08,rootMargin:"0px 0px -4% 0px"});
+  nodes.forEach((n,i)=>{
+    if(n.dataset.seen){n.classList.add("in");return}
+    n.dataset.dd=(i%8)*55;
+    io.observe(n);
+  });
+}
+
+/* ============ 预览 ============ */
+function openPreview(id){
+  const list=state.currentList.length?state.currentList:currentScope();
+  const idx=list.findIndex(i=>i.id===id);
+  if(idx<0)return;
+  state.currentList=list;state.currentIndex=idx;
+  paintPreview();
+  el("ov").classList.add("open");
+  document.body.style.overflow="hidden";
+}
+function paintPreview(){
+  const item=state.currentList[state.currentIndex];if(!item)return;
+  const p=parseKey(item.date),wd=WEEK[new Date(p.y,p.m-1,p.d).getDay()];
+  const im=el("ovImg");im.src=imgOf(item);im.alt=item.title;
+  im.style.animation="none";try{void im.offsetWidth}catch(e){};im.style.animation="";
+  el("ovStamp").textContent=`${p.y}.${pad(p.m)}.${pad(p.d)}`;
+  el("ovDate").textContent=`${p.y} 年 ${p.m} 月 ${p.d} 日 · ${wd}`;
+  el("ovTitle").textContent=item.title;
+  el("ovMeta").innerHTML=`<span>分类<b>${esc(item.tag||"—")}</b></span><span>地点<b>${esc(item.place||"—")}</b></span><span>出处<b>${esc(item.source||"—")}</b></span>`;
+  el("ovBody").innerHTML=(item.body||[]).map((t,i)=>i===1?`<blockquote>${esc(t)}</blockquote>`:`<p>${esc(t)}</p>`).join("");
+  el("ovExtra").innerHTML=[item.img,...(item.imgs||[])].filter(Boolean).map(u=>`<figure><img src="${esc(u)}" alt="" loading="lazy"/></figure>`).join("");
+  el("ovTags").innerHTML=[item.tag,item.place,`${p.y} 年`,`${p.m} 月`].filter(Boolean).map(t=>`<span>${esc(t)}</span>`).join("");
+  el("ovIdx").textContent=`${state.currentIndex+1} / ${state.currentList.length}`;
+  el("ovPrev").disabled=state.currentIndex===0;
+  el("ovNext").disabled=state.currentIndex===state.currentList.length-1;
+  el("ovScroll").scrollTop=0;
+}
+function closePreview(){el("ov").classList.remove("open");document.body.style.overflow=""}
+function stepPreview(d){const n=state.currentIndex+d;if(n<0||n>=state.currentList.length)return;state.currentIndex=n;paintPreview()}
+
+/* ============ 事件 ============ */
+el("selY").onchange=e=>{const v=e.target.value;
+  if(v==="all"){state.year=null;state.month=null;state.day=null}
+  else{state.year=+v;state.month=null;state.day=null}
+  renderAll()};
+el("selM").onchange=e=>{const v=+e.target.value;if(!v)return;
+  if(state.year===null){const t=lastEntryYM();state.year=t?t.y:new Date().getFullYear()}
+  state.month=v;state.day=null;renderAll()};
+el("prevM").onclick=()=>{
+  if(state.year===null){const t=lastEntryYM();if(!t)return;state.year=t.y;state.month=t.m}
+  if(state.month===1){state.year--;state.month=12}else state.month--;
+  state.day=null;renderAll()};
+el("nextM").onclick=()=>{
+  if(state.year===null){const t=lastEntryYM();if(!t)return;state.year=t.y;state.month=t.m}
+  if(state.month===12){state.year++;state.month=1}else state.month++;
+  state.day=null;renderAll()};
+el("clearDay").onclick=()=>{state.day=null;renderAll()};
+el("btnToday").onclick=()=>{
+  const n=new Date();state.year=n.getFullYear();state.month=n.getMonth()+1;state.day=n.getDate();
+  renderAll();toast("已跳到今天");
+};
+el("btnRandom").onclick=()=>{
+  if(!DATA.length)return;
+  const item=DATA[Math.floor(Math.random()*DATA.length)];
+  const p=parseKey(item.date);
+  state.year=p.y;state.month=p.m;state.day=p.d;state.query="";el("q").value="";
+  renderAll();openPreview(item.id);
+};
+el("q").oninput=e=>{state.query=e.target.value;state.day=null;renderRail();renderMain()};
+el("ovClose").onclick=closePreview;
+el("ov").onclick=e=>{if(e.target.id==="ov")closePreview()};
+el("ovPrev").onclick=()=>stepPreview(-1);
+el("ovNext").onclick=()=>stepPreview(1);
+el("ovCopy").onclick=async()=>{
+  const item=state.currentList[state.currentIndex];if(!item)return;
+  let txt = `${item.title}\n${item.date} · ${item.place||""}`;
+  if(item.tag) txt = `【${item.tag}】` + txt;
+  txt += `\n\n${(item.body||[]).join("\n\n")}`;
+  try{
+    await navigator.clipboard.writeText(txt);
+    toast("文案已复制" + (item.tag ? "（含分类）" : ""));
+  }catch{
+    toast("复制失败，请手动选择文字");
+  }
+};
+document.addEventListener("keydown",e=>{
+  if(el("ov").classList.contains("open")){
+    if(e.key==="Escape")closePreview();
+    if(e.key==="ArrowRight")stepPreview(1);
+    if(e.key==="ArrowLeft")stepPreview(-1);
+    return;
+  }
+  if(e.key==="/"&&document.activeElement.id!=="q"){e.preventDefault();el("q").focus()}
+});
+
+/* ============ 启动 ============ */
+function renderAll(){renderPicker();renderYearbar();renderRail();renderMain()}
+reindex();
+if(sorted.length){const p=parseKey(sorted[sorted.length-1].date);state.year=p.y;state.month=p.m}
+renderAll();
+
+(function(){
+  const bar=el("prog");if(!bar)return;
+  const onScroll=()=>{
+    try{
+      const h=document.documentElement;
+      const max=h.scrollHeight-h.clientHeight;
+      bar.style.width=(max>0?(h.scrollTop||document.body.scrollTop)/max*100:0)+"%";
+    }catch(e){}
+  };
+  window.addEventListener("scroll",onScroll,{passive:true});
+  onScroll();
+})();
+</script>
+</body>
+</html>
