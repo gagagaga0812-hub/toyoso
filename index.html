@@ -10,8 +10,6 @@
   body{font-family:var(--sans);color:var(--ink);background:var(--paper);background-image:radial-gradient(ellipse at 15% 0%,rgba(110,147,181,.07),transparent 50%),radial-gradient(ellipse at 90% 100%,rgba(127,163,168,.07),transparent 50%),repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(110,147,181,.02) 3px,rgba(110,147,181,.02) 4px);-webkit-font-smoothing:antialiased; overflow-x: hidden;}
   button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}input{font-family:inherit;font-size:13px;color:var(--ink);outline:none}
   .en{font-family:Georgia,serif;font-style:italic;letter-spacing:.06em}.mono{font-variant-numeric:tabular-nums}
-  
-  /* 顶栏 */
   header{position:sticky;top:0;z-index:50;background:rgba(244,248,252,.94);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}header::after{content:"";display:block;height:3px;border-top:1px solid var(--line-soft);margin-top:2px}
   .hwrap{max-width:1480px;margin:0 auto;padding:14px 36px;display:flex;align-items:center;gap:20px}
   .logo{display:flex;align-items:center;gap:13px}.logo-seal{width:42px;height:42px;border:1.5px solid var(--rose);border-radius:50%;display:grid;place-items:center;font-family:var(--serif);font-size:19px;color:var(--rose);position:relative;flex-shrink:0}.logo-seal::after{content:"";position:absolute;inset:3px;border:1px solid var(--rose);border-radius:50%;opacity:.4}
@@ -19,75 +17,17 @@
   .hright{margin-left:auto;display:flex;align-items:center;gap:10px}.search{display:flex;align-items:center;gap:8px;background:var(--paper2);border:1px solid var(--line);border-radius:999px;padding:9px 16px;width:250px;transition:border-color .2s}.search:focus-within{border-color:var(--rose)}.search input{border:none;background:none;width:100%;font-size:12.5px}.search input::placeholder{color:var(--ink3)}
   .btn{display:inline-flex;align-items:center;gap:7px;padding:9px 17px;border-radius:999px;font-size:12.5px;letter-spacing:.05em;transition:all .2s;border:1px solid transparent;white-space:nowrap}
   .btn-ghost{border-color:var(--line);color:var(--ink2)}.btn-ghost:hover{border-color:var(--rose);color:var(--rose)}.btn-rose{background:var(--rose);color:#F7FAFD}.btn-rose:hover{background:var(--rose-deep)}.btn-ink{background:var(--ink);color:var(--paper)}.btn-ink:hover{background:#52473D}
-  
-  /* 菜单切换按钮 */
   .menu-btn{display:grid;place-items:center;width:36px;height:36px;border-radius:50%;background:var(--paper2);border:1px solid var(--line);color:var(--ink2);transition:all 0.2s;margin-right:5px}
   .menu-btn:hover{background:var(--rose-soft);border-color:var(--rose);color:var(--rose)}
-
-  /* ===== 布局：抽屉式侧边栏 ===== */
   .shell{max-width:1480px;margin:0 auto;display:flex;align-items:start;min-height:calc(100vh - 73px);position:relative;transition:all 0.35s ease}
-  
-  /* 屏幕最左侧的隐形感应区 */
-  .edge-trigger {
-    position: fixed;
-    left: 0;
-    top: 73px;
-    width: 20px;
-    height: calc(100vh - 73px);
-    z-index: 54; /* 在侧边栏之下，但能感应 */
-  }
-  
-  /* 侧边栏本体 */
-  aside{
-    padding:26px 24px 50px;
-    border-right:1px solid var(--line-soft);
-    width:330px;
-    flex-shrink:0;
-    background:var(--paper);
-    transition:margin-left .35s cubic-bezier(.2,.8,.3,1);
-    overflow-y:auto;
-    scrollbar-width:thin;
-    scrollbar-color:var(--line) transparent;
-    height:calc(100vh - 73px);
-    position:sticky;
-    top:73px;
-    z-index: 55;
-  }
-  
-  /* 默认关闭状态 */
-  .shell.closed aside {
-    margin-left: -330px;
-  }
-
-  /* 当鼠标移动到左侧边缘，或者直接悬停在侧边栏上时，滑出 */
-  .edge-trigger:hover + aside,
-  aside:hover {
-    margin-left: 0 !important;
-  }
-
-  /* 当侧边栏滑出时，让感应区变透明，防止挡住侧边栏的内容 */
-  .edge-trigger:hover {
-    opacity: 0;
-    pointer-events: none;
-  }
-
-  /* 按钮点击后的固定状态 */
-  .shell.open aside {
-    margin-left: 0;
-  }
-  .shell.open .edge-trigger {
-    display: none; /* 按钮打开时关闭边缘感应 */
-  }
-
-  main{
-    padding:30px 38px 70px;
-    flex:1;
-    min-width:0;
-    max-width:1400px;
-    margin:0 auto;
-    transition: all 0.35s ease;
-  }
-
+  .edge-trigger{position:fixed;left:0;top:73px;width:20px;height:calc(100vh - 73px);z-index:54}
+  aside{padding:26px 24px 50px;border-right:1px solid var(--line-soft);width:330px;flex-shrink:0;background:var(--paper);transition:margin-left .35s cubic-bezier(.2,.8,.3,1);overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--line) transparent;height:calc(100vh - 73px);position:sticky;top:73px;z-index: 55;}
+  .shell.closed aside { margin-left: -330px; }
+  .edge-trigger:hover + aside, aside:hover { margin-left: 0 !important; }
+  .edge-trigger:hover { opacity: 0; pointer-events: none; }
+  .shell.open aside { margin-left: 0; }
+  .shell.open .edge-trigger { display: none; }
+  main{padding:30px 38px 70px;flex:1;min-width:0;max-width:1400px;margin:0 auto;transition: all 0.35s ease;}
   .aside-note{font-family:var(--serif);font-size:12px;color:var(--ink3);line-height:2;letter-spacing:.06em;margin-bottom:20px;padding-left:12px;border-left:2px solid var(--rose-soft)}.aside-note .en{display:block;font-size:11px;color:var(--rose);margin-top:4px}
   .cal{background:var(--paper2);border:1px solid var(--line);border-radius:6px;padding:16px 15px 12px;position:relative}.cal::before{content:"";position:absolute;top:-8px;left:50%;transform:translateX(-50%) rotate(-2deg);width:76px;height:20px;background:rgba(110,147,181,.16);border-left:1px dashed rgba(110,147,181,.32);border-right:1px dashed rgba(110,147,181,.32)}
   .cal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}.cal-ym{display:flex;align-items:baseline;gap:8px}.cal-ym select{border:none;background:none;font-family:var(--serif);font-size:17px;font-weight:600;cursor:pointer;padding:1px}.cal-ym select:last-child{font-size:13px;color:var(--ink2);font-weight:400}
@@ -106,12 +46,10 @@
   .tl-empty{font-size:12px;color:var(--ink3);line-height:1.9;padding:14px 0}
   .tl-item{animation:tlIn .45s cubic-bezier(.2,.8,.3,1) both}@keyframes tlIn{from{opacity:0;transform:translateX(-10px)}to{opacity:1;transform:none}}.tl-item::before{width:9px;height:9px;top:12px;left:0;border-width:2px}.tl-item:hover::before{transform:scale(1.25)}.tl-item::before{transition:border-color .15s,transform .2s,background .15s}.tl-item.active::before{animation:pulse 3s ease-out infinite}@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(110,147,181,.4)}70%{box-shadow:0 0 0 8px rgba(110,147,181,0)}100%{box-shadow:0 0 0 0 rgba(110,147,181,0)}}
   .month-label .mc{font-size:10px;color:var(--rose);background:var(--rose-soft);border-radius:999px;padding:1px 8px;letter-spacing:.05em}
-  
   #prog{position:fixed;top:0;left:0;height:2px;width:0;background:linear-gradient(90deg,var(--rose),var(--sage));z-index:90;transition:width .12s linear;border-radius:0 2px 2px 0}
   .main-head{margin-bottom:24px;position:relative}.main-kicker{display:flex;align-items:center;gap:12px;font-size:11px;letter-spacing:.25em;color:var(--rose);margin-bottom:12px}.main-kicker::after{content:"";width:60px;height:1px;background:var(--rose);opacity:.4}
   .main-title{font-family:var(--serif);font-size:36px;font-weight:600;line-height:1.3;letter-spacing:.02em}.main-title .num{font-family:Georgia,serif;font-style:italic;color:var(--rose);font-weight:400}.main-sub{font-size:12.5px;color:var(--ink3);margin-top:10px;letter-spacing:.04em}.main-sub i{font-style:normal;margin:0 8px;color:var(--line)}
   .yearbar{display:flex;align-items:center;gap:4px;flex-wrap:wrap;border-bottom:1px solid var(--line);padding-bottom:14px;margin-bottom:26px}.yr{padding:5px 12px;font-size:12px;color:var(--ink3);border-radius:3px;transition:.2s;letter-spacing:.05em}.yr .n{font-size:10px;opacity:.65;margin-left:3px}.yr:hover{color:var(--rose);background:var(--rose-soft)}.yr.on{background:var(--ink);color:var(--paper);transform:translateY(-1px)}.yr-sep{width:1px;height:12px;background:var(--line);margin:0 8px}.sort-btn{margin-left:auto;font-size:11px;color:var(--ink3);display:flex;align-items:center;gap:5px;padding:5px 10px;border-radius:3px}.sort-btn:hover{color:var(--rose);background:var(--rose-soft)}
-  
   .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:30px 26px;max-width:1200px;margin:0 auto}
   .card{opacity:0;transform:translateY(16px)}.card.in{opacity:1;transform:none;transition:opacity .55s cubic-bezier(.2,.8,.3,1),transform .55s cubic-bezier(.2,.8,.3,1),box-shadow .3s}
   .card{text-align:left;background:var(--paper2);border:1px solid var(--line-soft);border-radius:5px;padding:12px 12px 16px;display:flex;flex-direction:column;gap:11px;position:relative;box-shadow:0 1px 3px rgba(46,59,71,.05);cursor:pointer}.card.in:hover{transform:translateY(-5px) rotate(-.4deg);box-shadow:0 16px 36px -12px rgba(79,115,150,.25)}
@@ -120,10 +58,8 @@
   .card-tag{position:absolute;bottom:8px;left:8px;background:rgba(253,254,255,.93);font-size:10px;letter-spacing:.15em;padding:3px 9px;border-radius:2px;color:var(--ink2)}
   .card-date{font-size:10.5px;color:var(--rose);letter-spacing:.14em;padding:0 3px}.card h3{font-family:var(--serif);font-size:17.5px;font-weight:600;line-height:1.5;padding:0 3px;letter-spacing:.01em}.card p{font-size:12.5px;line-height:1.85;color:var(--ink2);padding:0 3px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
   .card-foot{display:flex;align-items:center;gap:7px;font-size:10.5px;color:var(--ink3);padding:2px 3px 0;margin-top:auto}.card-foot .sep{width:3px;height:3px;border-radius:50%;background:var(--line)}
-  
   .empty{grid-column:1/-1;text-align:center;padding:64px 30px;border:1px dashed var(--line);border-radius:6px;background:var(--paper2)}.empty .t{font-family:var(--serif);font-size:22px;margin-bottom:10px}.empty .s{font-size:12.5px;color:var(--ink3);line-height:1.9}.empty .btn{margin-top:20px}
   footer{border-top:1px solid var(--line);margin-top:20px}.fwrap{max-width:1480px;margin:0 auto;padding:26px 36px;display:flex;align-items:center;justify-content:space-between;font-size:11px;color:var(--ink3);letter-spacing:.08em}.fwrap .en{font-size:12px;color:var(--rose)}
-  
   .ov{position:fixed;inset:0;z-index:100;display:none;background:rgba(46,59,71,.45);backdrop-filter:blur(5px)}.ov.open{display:block;animation:fade .25s}@keyframes fade{from{opacity:0}to{opacity:1}}
   .sheet{position:absolute;inset:24px;max-width:1360px;margin:0 auto;background:var(--paper);border-radius:8px;overflow:hidden;display:grid;grid-template-columns:1.1fr 1fr;box-shadow:0 30px 80px -20px rgba(46,59,71,.4);animation:up .35s cubic-bezier(.2,.8,.3,1)}@keyframes up{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
   .sheet-media{background:#E4EDF5;display:grid;place-items:center;position:relative;overflow:hidden}.sheet-media img{max-width:100%;max-height:100%;object-fit:contain;display:block;animation:imgIn .5s ease both}@keyframes imgIn{from{opacity:0}to{opacity:1}}
@@ -138,7 +74,8 @@
   .s-tags{display:flex;flex-wrap:wrap;gap:7px;margin-top:26px;padding-top:20px;border-top:1px dashed var(--line)}.s-tags span{font-size:10.5px;color:var(--ink2);border:1px solid var(--line);border-radius:999px;padding:4px 12px;letter-spacing:.05em}
   .s-nav{display:flex;gap:10px;padding:14px 26px;border-top:1px solid var(--line-soft);background:var(--paper)}.s-nav .btn{flex:1;justify-content:center}.s-nav .btn:disabled{opacity:.35;cursor:default}.s-nav .idx{align-self:center;font-size:11px;color:var(--ink3);min-width:56px;text-align:center}
   .toast{position:fixed;left:50%;bottom:36px;transform:translate(-50%,14px);background:var(--ink);color:var(--paper2);font-size:12.5px;padding:12px 24px;border-radius:999px;z-index:200;opacity:0;pointer-events:none;transition:.25s;letter-spacing:.05em;box-shadow:0 10px 30px -8px rgba(46,59,71,.4)}.toast.on{opacity:1;transform:translate(-50%,0)}
-  
+  .video-wrapper { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
+  .video-wrapper video { max-width: 100%; max-height: 100%; outline: none; }
   @media(max-width:1060px){
     .shell{display:block}
     .edge-trigger{display:none}
@@ -172,9 +109,7 @@
     </div>
   </header>
   <div class="shell closed" id="mainShell">
-    <!-- 左侧隐形感应区 -->
     <div class="edge-trigger"></div>
-    
     <aside>
       <div class="aside-note">把值得留下的日子，<br/>一朵一朵夹进手帖里。<span class="en">every day, a pressed flower.</span></div>
       <div class="cal">
@@ -189,157 +124,20 @@
     <main>
       <div class="main-head"><div class="main-kicker">ARCHIVE <span class="en" style="letter-spacing:.05em">/ by date</span></div><h1 class="main-title" id="h1"></h1><div class="main-sub" id="sub"></div></div>
       <div class="yearbar" id="yearbar"></div>
-      <div class="cards" id="cards"></div>
+      <div class="cards" id="cards"><div style="text-align:center;padding:50px;color:#8FA1B3;">正在加载云端数据...</div></div>
     </main>
   </div>
   <footer><div class="fwrap"><span>自留地 · 一个安静的记录库</span><span class="en">slowly, gently, keep the days.</span></div></footer>
-  <div class="ov" id="ov"><div class="sheet"><div class="sheet-media"><img id="ovImg" alt=""/><div class="stamp" id="ovStamp"></div></div><div class="sheet-body"><div class="sheet-top"><span class="k">一頁 / PREVIEW</span><button class="xbtn" id="ovClose" aria-label="关闭"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></button></div><div class="sheet-scroll" id="ovScroll"><div class="s-date" id="ovDate"></div><h2 class="s-title" id="ovTitle"></h2><div class="s-meta" id="ovMeta"></div><div class="s-body" id="ovBody"></div><div class="s-extra" id="ovExtra"></div><div class="s-tags" id="ovTags"></div></div><div class="s-nav"><button class="btn btn-ghost" id="ovPrev">← 上一页</button><span class="idx" id="ovIdx"></span><button class="btn btn-ghost" id="ovCopy">复制文案</button><button class="btn btn-ink" id="ovNext">下一页 →</button></div></div></div></div>
+  <div class="ov" id="ov"><div class="sheet"><div class="sheet-media"></div><div class="sheet-body"><div class="sheet-top"><span class="k">一頁 / PREVIEW</span><button class="xbtn" id="ovClose" aria-label="关闭"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></button></div><div class="sheet-scroll" id="ovScroll"><div class="s-date" id="ovDate"></div><h2 class="s-title" id="ovTitle"></h2><div class="s-meta" id="ovMeta"></div><div class="s-body" id="ovBody"></div><div class="s-extra" id="ovExtra"></div><div class="s-tags" id="ovTags"></div></div><div class="s-nav"><button class="btn btn-ghost" id="ovPrev">← 上一页</button><span class="idx" id="ovIdx"></span><button class="btn btn-ghost" id="ovCopy">复制文案</button><button class="btn btn-ink" id="ovNext">下一页 →</button></div></div></div></div>
   <div class="toast" id="toast"></div>
 <script>
-const SEED = [
-  {
-    "id": "u17944990885120",
-    "date": "2024-08-24",
-    "title": "<Mine>",
-    "tag": "ig更新",
-    "summary": "ig更新",
-    "body": [],
-    "place": "",
-    "source": "",
-    "img": "https://internal-api-drive-stream.feishu.cn/space/api/box/stream/download/authcode/?code=N2QzMTA3NzE4MjNhODcxZWI3MWM1NWE4OTVmMGIyZjBfNmYwYjA3NGVmNTRhOTA0OTY4NTI2MjAzM2U3ZGNjYWNfSUQ6NzcwNzE0NTU1MTg2NzAzOTAwMV8xNzk0NDYwMTkzOjE3OTQ1NDY1OTNfVjM"
-  },
-  {
-    "id": "u17944990885121",
-    "date": "2025-11-12",
-    "title": "<S Cawaii! ME> 【奥野壮致丰田裕大的一条Message】",
-    "tag": "杂志",
-    "summary": "致裕大君：希望「Season2」能被更多人看到……这是我们两人共同的愿望，我们也经常聊起这个话题。所以今天我想对你说的是，关于未来。比我稍长一些的前辈们，似乎有不少是在十几岁时通过校园剧合作结识对方",
-    "body": [
-      "致裕大君： 希望「Season2」能被更多人看到……这是我们两人共同的愿望，我们也经常聊起这个话题。 所以今天我想对你说的是，关于未来。 比我稍长一些的前辈们，似乎有不少是在十几岁时通过校园剧合作结识对方，成长后再次共演的，但我十几岁的时候出演的校园剧并不多。 而且裕大君你是在我20多岁成为大人后才结识的搭档，我们却能在这么短的时间里再次共演。如今我不仅希望因为《美搭》，也希望在其他工作上也能跟你一起共事。 我想和你一起走过今后作为演员的人生道路。 私下里也是不管什么事情都好，你已经成为我希望能在未来五年、十年依然保持联系的人……感觉我们会长久交往下去呢。"
-    ],
-    "place": "",
-    "source": "",
-    "img": "https://internal-api-drive-stream.feishu.cn/space/api/box/stream/download/authcode/?code=N2Y2ODY5MDdiM2I1OGM5M2I2Y2NhN2Q3YmJjM2Y4M2JfNWYyYWIzZTJmZWQ1MWYyNWFmZWMwMWNlNjYyODYzOWNfSUQ6NzcwNzEzOTM1OTk1NDI1OTE3OV8xNzk0NDYwMTkzOjE3OTQ1NDY1OTNfVjM"
-  },
-  {
-    "id": "u17944990885122",
-    "date": "2025-11-13",
-    "title": "<S Cawaii! ME>【丰田裕大致奥野壮的一条Message】",
-    "tag": "杂志",
-    "summary": "致奥野君，so酱：感谢你和我一起创作「Season2」。你真的十分可靠，你积极乐观、勇往直前的姿态，总能给我带来勇气。就如我总说的，正因为我们俩是截然不同的人，所以找你商量事情才格外有趣。",
-    "body": [
-      "致奥野君，so酱：感谢你和我一起创作「Season2」。你真的十分可靠，你积极乐观、勇往直前的姿态，总能给我带来勇气。就如我总说的，正因为我们俩是截然不同的人，所以找你商量事情才格外有趣。你总能给我带来我自己想不到的东西，你让我有自信觉得“原来也可以这么乐观地看待问题呀”。我一旦想得太多，你就能瞬间帮我卸下那些无谓的紧张。我特别喜欢我们之间的这种平衡感。我也希望自己能给你带去积极正面的情绪……所以，今后也请多多关照。我们很快又能再见面的。"
-    ],
-    "place": "",
-    "source": "",
-    "img": "https://internal-api-drive-stream.feishu.cn/space/api/box/stream/download/authcode/?code=Y2E3YzdmYTJhM2RjZDc4Y2E4YTAzZmM2YTk3MThlY2RfMzY2ZGVmZWVhNWYwNjhhOTYyMTQyZjk4YzgxZDUxOTBfSUQ6NzcwNzEzOTgzNzUxNzcxMjY0NF8xNzk0NDYwMTkzOjE3OTQ1NDY1OTNfVjM"
-  },
-  {
-    "id": "u17944990885123",
-    "date": "2025-11-14",
-    "title": "<S Cawaii! ME>采访片段",
-    "tag": "杂志",
-    "summary": "Q：提问丰田先生，如果爱上奥野先生，你觉得会有什么美好的事情发生呢？丰田： 和奥野君谈恋爱的话，他一定会很照顾对方！奥野： (马上插话) 啊~，你根本不懂我！丰田：不会吧！",
-    "body": [
-      "Q：提问丰田先生，如果爱上奥野先生，你觉得会有什么美好的事情发生呢？丰田： 和奥野君谈恋爱的话，他一定会很照顾对方！奥野： (马上插话) 啊~，你根本不懂我！丰田：不会吧！我以为你是很体贴地会为伴侣让步的人。虽然你不是没有自己的想法，但你总是会先接纳对方的意见和想做的事情。奥野： 嗯，这个倒是真的。丰田： 不过，你可能不太会说“喜欢”或者“我爱你”这种话吧。奥野： 果然还是不了解我！(笑)丰田： 你会说吗！？（惊讶）奥野： 我超爱说的！ 我可是个很黏人的类型哦。丰田： (对着录音笔)……他说他是黏人精呢 (笑)。"
-    ],
-    "place": "",
-    "source": "",
-    "img": "https://internal-api-drive-stream.feishu.cn/space/api/box/stream/download/authcode/?code=ZWU2NGNkZjNjMTU2OGI4ODg3OGEzZjNhZDBiNjU3MmJfZDdhY2FlYTQyNTJlNjQ3ODhmMzRkZDY2MTNlY2I1ZjlfSUQ6NzcwNzE0MDU5MjczMzU3MjM0NF8xNzk0NDYwMTkzOjE3OTQ1NDY1OTNfVjM"
-  },
-  {
-    "id": "u17944990885124",
-    "date": "2025-11-14",
-    "title": "美搭官推更新",
-    "tag": "官方",
-    "summary": "丰田先生身穿丝绒套装， 非常契合节日氛围的优雅装扮看到奥野先生的短款上衣搭配皮裤，他忍不住赞叹：「简直像偶像一样！超适合你！！」",
-    "body": [
-      "丰田先生身穿丝绒套装， 非常契合节日氛围的优雅装扮看到奥野先生的短款上衣搭配皮裤，他忍不住赞叹：「简直像偶像一样！超适合你！！」听了这话，奥野先生雀跃得当场跳起了一段可爱的小舞步"
-    ],
-    "place": "",
-    "source": "",
-    "img": "https://internal-api-drive-stream.feishu.cn/space/api/box/stream/download/authcode/?code=OGE1MTQwZmU5NzI0ZWZhOWZjMThkMDQ0YmYyM2U2YTdfMjcyNDc5N2FjMGZmZjM0ODY1ZWFkMDM0Nzg2ZWQyODJfSUQ6NzcwNzE0MDg5NjczOTU5MzQ1Ml8xNzk0NDYwMTkzOjE3OTQ1NDY1OTNfVjM"
-  },
-  {
-    "id": "u17944990885125",
-    "date": "2025-11-18",
-    "title": "<Duet LUXE> vol.4奥野壮x丰田裕大采访",
-    "tag": "杂志",
-    "summary": "杂志",
-    "body": [],
-    "place": "",
-    "source": "",
-    "img": "https://internal-api-drive-stream.feishu.cn/space/api/box/stream/download/authcode/?code=YTcwMzBmYTZmMWUxYjA5YzU5ZTJmZTA2NmZiMDMyNzBfYTRhMWI5ZWI1MjJiYTA4NWZkODAzZjhkOGExYmI2NjZfSUQ6NzcwNzE0MTYyMjU4NDMzMTUyNl8xNzk0NDYwMTkzOjE3OTQ1NDY1OTNfVjM"
-  },
-  {
-    "id": "u17944990885126",
-    "date": "2025-11-19",
-    "title": "<anan> No.2472 奥野壮×丰田裕大",
-    "tag": "杂志",
-    "summary": "杂志",
-    "body": [],
-    "place": "",
-    "source": "",
-    "img": "https://internal-api-drive-stream.feishu.cn/space/api/box/stream/download/authcode/?code=MDNkZjNhYzNmZGVjMjIzOWUxNzBjYzY5NWVhNjhjMWRfOGYyYjVkMjllZTMyMTA5MzA5NmM5MzljYTVmZjBhNTRfSUQ6NzcwNzE0MjAyMDYyMzczMTkwNl8xNzk0NDYwMTkzOjE3OTQ1NDY1OTNfVjM"
-  },
-  {
-    "id": "u17944990885127",
-    "date": "2025-11-18",
-    "title": "<anan>拍摄幕后记事",
-    "tag": "杂志",
-    "summary": "【为纪念\"美搭\"第二季，奥野壮先生 & 丰田裕大先生再度降临《anan》！】",
-    "body": [
-      "【为纪念\"美搭\"第二季，奥野壮先生 & 丰田裕大先生再度降临《anan》！】",
-      "我负责策划了邀请主演明年1月开播的电视剧《美妆搭档情人 Season2》的奥野壮先生 & 丰田裕大先生登场的Close up企划。",
-      "【本次以\"工作模式与生活模式（on/off）\"为主题，拍摄了仅属于他们二人的特别瞬间。】",
-      "上次登场特辑获得众多粉丝热烈反响。拍摄前当我询问\"两位是否也听到了大家的反响呢？\"，得到了\"反响超级热烈！\"的珍贵回应。奥野先生表示\"能再次两人共同出演很开心呢\"，丰田先生便笑着回应\"嗯，很开心\"。从拍摄前就默契十足、氛围融洽的两人，让全体工作人员都不禁露出微笑！在和谐的氛围中，拍摄正式开始。",
-      "本次以\"工作模式/生活模式（on/off）\"为主题，拍摄了仅属于他们二人的特别瞬间。首先拍摄的第一组造型，是象征工作模式（on）的时尚黑白西装造型。通过松开领带、刻意不穿好外套等穿搭方式，保留了几分不羁感。由于按照奥野先生→丰田先生的顺序进行单人拍摄，当我们告知奥野先生\"（在丰田先生拍摄时）请在影棚稍等\"，他立刻表示\"我想看模特状态下的丰田裕大（笑）\"。看着监视器的奥野先生连连赞叹\"真不愧是\"\"好帅\"，让丰田先生露出了羞涩表情。这段温馨互动让影棚充满了温暖笑声。",
-      "紧接着进行双人拍摄。时而指尖相触背靠背，时而丰田先生搂住奥野先生肩膀，时而奥野先生将下巴轻抵丰田先生肩头，两人以惊人默契不断变换姿势。这正是完成第二季拍摄后，能感受到二人羁绊愈发深厚的瞬间。最后还尝试了将彼此领带末端系在一起的吸睛镜头。虽然需要反复\"微调\"领带位置与长度，但两位始终愉快配合。成片效果敬请通过杂志确认，务必关注二人新鲜的表情与姿态。",
-      "【仿佛窥见私密时光？共撑一伞的生活风镜头。】",
-      "随后拍摄的是象征生活模式（off）的场景。奥野先生身着运动夹克&尼龙裤，丰田先生则穿 polo 衫&运动裤，造型营造出窥见两人真实\"拍摄后\"状态的氛围。虽然外景拍摄遇上下雨...但团队巧妙利用雨景，拍摄了共撑透明雨伞倚靠护栏、共饮罐装咖啡等近乎素颜的状态。返回影棚时共撑一伞的两人，当工作人员提醒\"这边有伞...\"时，他们相视而笑\"啊都没注意到\"，瞬间流露的默契令人会心一笑。在影棚前停车场的拍摄中，还捕捉了长椅自然交谈、共享有线耳机听音乐等动人镜头。他们究竟在聊什么？听着什么音乐？敬请读者带着想象翻阅杂志。",
-      "访谈不仅深入探讨作品看点，更揭秘了\"前天突然接到\"的\"初次电话\"等趣味话题。这套令人对明年一月开播更添期待的特别写真&访谈，敬请期待。（S.K）"
-    ],
-    "place": "",
-    "source": "",
-    "img": ""
-  },
-  {
-    "id": "u17944990885128",
-    "date": "2025-11-21",
-    "title": "<BARFOUT!> 2025年12月号 奥野壮x丰田裕大",
-    "tag": "杂志",
-    "summary": "杂志",
-    "body": [],
-    "place": "",
-    "source": "",
-    "img": "https://internal-api-drive-stream.feishu.cn/space/api/box/stream/download/authcode/?code=NGFlZjdmN2VjZTRhYjJhNzE4YmMxNmMxMzI5Nzk3OTRfY2RmOGY5YWRmMDRiNTc3MDk5Zjc1MjlmZjZiZDAwMzJfSUQ6NzcwNzE0MjM4MjQ0MTQxODAwMF8xNzk0NDYwMTkzOjE3OTQ1NDY1OTNfVjM"
-  },
-  {
-    "id": "u17944990885129",
-    "date": "2025-12-02",
-    "title": "<CHEER>Vol.64奥野壮x丰田裕大",
-    "tag": "杂志",
-    "summary": "杂志",
-    "body": [],
-    "place": "",
-    "source": "",
-    "img": "https://internal-api-drive-stream.feishu.cn/space/api/box/stream/download/authcode/?code=Y2UxZTBjNjU3YTcyZTQwMjExZmYzZWIxY2RhZGI2ZDlfYzNhNWVhYjQwY2UzZjFiNTk0YmQ1OWFjNjdhM2E1OTZfSUQ6NzcwNzE0MzQ2ODg0MTQ3MTIzNF8xNzk0NDYwMTkzOjE3OTQ1NDY1OTNfVjM"
-  },
-  {
-    "id": "u179449908851210",
-    "date": "2025-12-09",
-    "title": "<试写会>",
-    "tag": "媒体活动",
-    "summary": "📢📢📢📢丰田裕大奥野壮同居了",
-    "body": [
-      "📢📢📢📢丰田裕大奥野壮同居了",
-      "家产真的同居了我怎么会做这样的梦🤯妹子们👩🏻我再也不能跟你们在天台相遇了😔因为我家产同居了😱家产谈了吧🥰我再也没有办法一直哭了😭因为我家产同居了😝家产官宣怎么没叫上我😡妹子们☺️我说我家产同居了🥳同居了一周🤩"
-    ],
-    "place": "",
-    "source": "",
-    "img": "https://internal-api-drive-stream.feishu.cn/space/api/box/stream/download/authcode/?code=YTlkY2IyZjA3ODE4MDg3Y2IyMDY1MjQ1YzZhZDQ2NjlfZGM1ZWQ0MTBiNDkwNDEwMWZmM2JmYzI5YzNmYjM3MTNfSUQ6NzcwNzE0NjQ3Nzk2OTM2MjExMl8xNzk0NDYwMTkzOjE3OTQ1NDY1OTNfVjM"
-  }
-];
+// ==========================================
+// 核心配置区（已填入你的真实数据）
+// ==========================================
+const SUPABASE_URL = 'https://ozgfciwblxktuzwjyang.supabase.co'; 
+const SUPABASE_ANON_KEY = 'sb_publishable_Mv4ig0uVWjO8pscMU8ZdAQ_ewrAjGH5';
+
+let DATA = [];
 const PALETTES = [["#D5E4EF","#6E93B5","#F7FAFD"],["#D8E9E8","#7FA3A8","#F5FAF9"],["#DCE6F2","#5F83A8","#F6F9FC"],["#D0E0EA","#8FA9BF","#F8FBFD"],["#DDE8F0","#7B98B0","#F7FAFC"],["#D2E4EE","#4F7396","#F4F9FC"]];
 function hashStr(s){let h=0;for(let i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))>>>0;return h}
 function artFor(item){
@@ -354,7 +152,6 @@ function artFor(item){
   return "data:image/svg+xml;charset=utf-8,"+encodeURIComponent(svg);
 }
 function imgOf(item){return item.img || (item.imgs && item.imgs[0]) || artFor(item)}
-const DATA = JSON.parse(JSON.stringify(SEED));
 const state={year:null,month:null,day:null,query:"",sortAsc:true,currentList:[],currentIndex:-1};
 const el=id=>document.getElementById(id);const pad=n=>String(n).padStart(2,"0");const toKey=(y,m,d)=>`${y}-${pad(m)}-${pad(d)}`;const parseKey=k=>{const[y,m,d]=k.split("-").map(Number);return{y,m,d}};const WEEK=["周日","周一","周二","周三","周四","周五","周六"];const esc=s=>String(s??"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
 let sorted=[],byDate={},years=[];
@@ -385,7 +182,7 @@ function renderRail(){
   if(!list.length){box.innerHTML=`<div class="tl-empty">这一段时间里还没有手帖。<br/>试试放大年份，或清空搜索。</div>`;return}
   const ordered=state.sortAsc?list:[...list].reverse();const groups={};ordered.forEach(i=>{const k=i.date.slice(0,7);(groups[k]=groups[k]||[]).push(i)});
   box.innerHTML=Object.keys(groups).map(k=>{const[y,m]=k.split("-");return `<div class="month-label">${y} · ${+m} 月<span class="mc">${groups[k].length} 页</span></div><div class="tl-group">`+groups[k].map(item=>{const d=+item.date.slice(8);const act=(state.day===d&&state.year===+y&&state.month===+m)?" active":"";return `<button class="tl-item${act}" data-id="${esc(item.id)}"><span class="d mono">${pad(d)}</span><span class="t">${esc(item.title)}</span></button>`}).join("")+`</div>`}).join("");
-  const items=box.querySelectorAll(".tl-item");items.forEach((b,i)=>{b.style.animationDelay=Math.min(i*32,420)+"ms"});items.forEach(b=>{b.onclick=()=>{const item=DATA.find(i=>i.id===b.dataset.id);if(!item)return;const p=parseKey(item.date);state.year=p.y;state.month=p.m;state.day=p.d;renderAll();openPreview(item.id);}});
+  const items=box.querySelectorAll(".tl-item");items.forEach((b,i)=>{b.style.animationDelay=Math.min(i*32,420)+"ms"});items.forEach(b=>{b.onclick=()=>{const item=DATA.find(i=>String(i.id)===b.dataset.id);if(!item)return;const p=parseKey(item.date);state.year=p.y;state.month=p.m;state.day=p.d;renderAll();openPreview(item.id);}});
   const act=box.querySelector(".tl-item.active");if(act)try{act.scrollIntoView({block:"nearest"})}catch(e){}
 }
 function currentScope(){const q=state.query.trim();let list=sorted.filter(i=>{if(state.year!==null&&+i.date.slice(0,4)!==state.year)return false;if(state.month&&+i.date.slice(5,7)!==state.month)return false;if(state.month&&state.day)return +i.date.slice(8)===state.day;return true}).filter(i=>matches(i,q));return state.sortAsc?list:[...list].reverse()}
@@ -401,28 +198,25 @@ function renderMain(){
   cards.querySelectorAll(".card").forEach(node=>{node.onclick=()=>openPreview(node.dataset.id);node.onkeydown=e=>{if(e.key==="Enter")openPreview(node.dataset.id)}});revealCards(cards);
 }
 function revealCards(cards){const nodes=cards.querySelectorAll(".card");if(!("IntersectionObserver" in window)){nodes.forEach(n=>n.classList.add("in"));return}const io=new IntersectionObserver(es=>{es.forEach(en=>{if(en.isIntersecting){const n=en.target;if(n.dataset.seen){n.classList.add("in");io.unobserve(n);return}n.dataset.seen="1";const d=+n.dataset.dd||0;setTimeout(()=>n.classList.add("in"),d);io.unobserve(n)}})},{threshold:.08,rootMargin:"0px 0px -4% 0px"});nodes.forEach((n,i)=>{if(n.dataset.seen){n.classList.add("in");return}n.dataset.dd=(i%8)*55;io.observe(n)})}
-function openPreview(id){const list=state.currentList.length?state.currentList:currentScope();const idx=list.findIndex(i=>i.id===id);if(idx<0)return;state.currentList=list;state.currentIndex=idx;paintPreview();el("ov").classList.add("open");document.body.style.overflow="hidden"}
+function openPreview(id){const list=state.currentList.length?state.currentList:currentScope();const idx=list.findIndex(i=>String(i.id)===String(id));if(idx<0)return;state.currentList=list;state.currentIndex=idx;paintPreview();el("ov").classList.add("open");document.body.style.overflow="hidden"}
 function paintPreview(){
-  const item=state.currentList[state.currentIndex];if(!item)return;const p=parseKey(item.date),wd=WEEK[new Date(p.y,p.m-1,p.d).getDay()];const im=el("ovImg");im.src=imgOf(item);im.alt=item.title;im.style.animation="none";try{void im.offsetWidth}catch(e){};im.style.animation="";
+  const item=state.currentList[state.currentIndex];if(!item)return;const p=parseKey(item.date),wd=WEEK[new Date(p.y,p.m-1,p.d).getDay()];
+  const mediaBox=document.querySelector('.sheet-media');
+  
+  if(item.video) {
+    mediaBox.innerHTML = `<div class="video-wrapper"><video src="${esc(item.video)}" controls preload="metadata" playsinline></video></div><div class="stamp" id="ovStamp"></div>`;
+  } else {
+    mediaBox.innerHTML = `<img id="ovImg" src="${imgOf(item)}" alt="${esc(item.title)}"/><div class="stamp" id="ovStamp"></div>`;
+    const im=document.getElementById("ovImg");im.style.animation="none";try{void im.offsetWidth}catch(e){};im.style.animation="";
+  }
   el("ovStamp").textContent=`${p.y}.${pad(p.m)}.${pad(p.d)}`;el("ovDate").textContent=`${p.y} 年 ${p.m} 月 ${p.d} 日 · ${wd}`;el("ovTitle").textContent=item.title;el("ovMeta").innerHTML=`<span>分类<b>${esc(item.tag||"—")}</b></span><span>地点<b>${esc(item.place||"—")}</b></span><span>出处<b>${esc(item.source||"—")}</b></span>`;
-  el("ovBody").innerHTML=(item.body||[]).map((t,i)=>i===1?`<blockquote>${esc(t)}</blockquote>`:`<p>${esc(t)}</p>`).join("");el("ovExtra").innerHTML=[item.img,...(item.imgs||[])].filter(Boolean).map(u=>`<figure><img src="${esc(u)}" alt="" loading="lazy"/></figure>`).join("");el("ovTags").innerHTML=[item.tag,item.place,`${p.y} 年`,`${p.m} 月`].filter(Boolean).map(t=>`<span>${esc(t)}</span>`).join("");
+  el("ovBody").innerHTML=(item.body||[]).map((t,i)=>i===1?`<blockquote>${esc(t)}</blockquote>`:`<p>${esc(t)}</p>`).join("");el("ovExtra").innerHTML="";el("ovTags").innerHTML=[item.tag,item.place,`${p.y} 年`,`${p.m} 月`].filter(Boolean).map(t=>`<span>${esc(t)}</span>`).join("");
   el("ovIdx").textContent=`${state.currentIndex+1} / ${state.currentList.length}`;el("ovPrev").disabled=state.currentIndex===0;el("ovNext").disabled=state.currentIndex===state.currentList.length-1;el("ovScroll").scrollTop=0;
 }
 function closePreview(){el("ov").classList.remove("open");document.body.style.overflow=""}
 function stepPreview(d){const n=state.currentIndex+d;if(n<0||n>=state.currentList.length)return;state.currentIndex=n;paintPreview()}
-
-function toggleSidebar(){
-  const shell = el("mainShell");
-  if(shell.classList.contains("open")){
-    shell.classList.remove("open");
-    shell.classList.add("closed");
-  } else {
-    shell.classList.add("open");
-    shell.classList.remove("closed");
-  }
-}
+function toggleSidebar(){const shell = el("mainShell");if(shell.classList.contains("open")){shell.classList.remove("open");shell.classList.add("closed");} else {shell.classList.add("open");shell.classList.remove("closed");}}
 el("toggleSidebar").onclick = toggleSidebar;
-
 el("selY").onchange=e=>{const v=e.target.value;if(v==="all"){state.year=null;state.month=null;state.day=null}else{state.year=+v;state.month=null;state.day=null}renderAll()};
 el("selM").onchange=e=>{const v=+e.target.value;if(!v)return;if(state.year===null){const t=lastEntryYM();state.year=t?t.y:new Date().getFullYear()}state.month=v;state.day=null;renderAll()};
 el("prevM").onclick=()=>{if(state.year===null){const t=lastEntryYM();if(!t)return;state.year=t.y;state.month=t.m}if(state.month===1){state.year--;state.month=12}else state.month--;state.day=null;renderAll()};
@@ -435,7 +229,25 @@ el("ovClose").onclick=closePreview;el("ov").onclick=e=>{if(e.target.id==="ov")cl
 el("ovCopy").onclick=async()=>{const item=state.currentList[state.currentIndex];if(!item)return;let txt=`${item.title}\n${item.date} · ${item.place||""}`;if(item.tag)txt=`【${item.tag}】`+txt;txt+=`\n\n${(item.body||[]).join("\n\n")}`;try{await navigator.clipboard.writeText(txt);toast("文案已复制"+(item.tag?"（含分类）":""))}catch{toast("复制失败，请手动选择文字")}};
 document.addEventListener("keydown",e=>{if(el("ov").classList.contains("open")){if(e.key==="Escape")closePreview();if(e.key==="ArrowRight")stepPreview(1);if(e.key==="ArrowLeft")stepPreview(-1);return}if(e.key==="/"&&document.activeElement.id!=="q"){e.preventDefault();el("q").focus()}});
 function renderAll(){renderPicker();renderYearbar();renderRail();renderMain()}
-reindex();if(sorted.length){const p=parseKey(sorted[sorted.length-1].date);state.year=p.y;state.month=p.m}renderAll();
+
+async function initApp() {
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/entries?select=*&order=date.desc`, {
+      headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` }
+    });
+    if(!res.ok) throw new Error('API 请求失败');
+    const cloudData = await res.json();
+    DATA = cloudData.map(item => ({ ...item, id: String(item.id), body: item.body || [], img: item.img || '', video: item.video || '' }));
+    reindex();
+    if(sorted.length){ const p = parseKey(sorted[sorted.length-1].date); state.year = p.y; state.month = p.m; }
+    renderAll();
+  } catch (error) {
+    console.error(error);
+    el('cards').innerHTML = `<div class="empty" style="padding:50px;text-align:center;"><div class="t" style="color:#A8442F;">云端加载失败</div><div class="s">请检查你的 Supabase URL 和 Key 是否正确，以及数据表是否建好。</div></div>`;
+  }
+}
+initApp();
+
 (function(){const bar=el("prog");if(!bar)return;const onScroll=()=>{try{const h=document.documentElement;const max=h.scrollHeight-h.clientHeight;bar.style.width=(max>0?(h.scrollTop||document.body.scrollTop)/max*100:0)+"%" }catch(e){}};window.addEventListener("scroll",onScroll,{passive:true});onScroll()})();
 </script>
 </body>
