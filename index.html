@@ -103,6 +103,7 @@
   .sheet-media:hover .gallery-controls { opacity: 1; visibility: visible; }
 
   .sheet-body{display:flex;flex-direction:column;min-height:0;background:var(--paper2);border-left:1px solid var(--line)}.sheet-top{display:flex;align-items:center;justify-content:space-between;padding:16px 26px;border-bottom:1px solid var(--line-soft)}.sheet-top .k{font-size:10px;letter-spacing:.3em;color:var(--ink3)}
+  
   .xbtn{width:32px;height:32px;border:1px solid var(--line);border-radius:50%;display:grid;place-items:center;color:var(--ink2);transition:.2s}.xbtn:hover{border-color:var(--rose);color:var(--rose);transform:rotate(90deg)}
   .sheet-scroll{flex:1;overflow-y:auto;padding:28px 34px;min-height:0;scrollbar-width:thin;scrollbar-color:var(--line) transparent}
   .s-date{font-family:Georgia,serif;font-style:italic;font-size:14px;color:var(--rose);letter-spacing:.1em;margin-bottom:14px}.s-title{font-family:var(--serif);font-size:27px;font-weight:600;line-height:1.5;margin-bottom:18px}.s-meta{display:flex;flex-wrap:wrap;gap:14px;font-size:11px;color:var(--ink3);padding-bottom:18px;border-bottom:1px solid var(--line-soft);margin-bottom:22px}.s-meta b{color:var(--ink2);font-weight:500;margin-left:5px}
@@ -113,6 +114,9 @@
   .s-nav{display:flex;gap:10px;padding:14px 26px;border-top:1px solid var(--line-soft);background:var(--paper)}.s-nav .btn{flex:1;justify-content:center}.s-nav .btn:disabled{opacity:.35;cursor:default}.s-nav .idx{align-self:center;font-size:11px;color:var(--ink3);min-width:56px;text-align:center}
   .toast{position:fixed;left:50%;bottom:36px;transform:translate(-50%,14px);background:var(--ink);color:var(--paper2);font-size:12.5px;padding:12px 24px;border-radius:999px;z-index:200;opacity:0;pointer-events:none;transition:.25s;letter-spacing:.05em;box-shadow:0 10px 30px -8px rgba(46,59,71,.4)}.toast.on{opacity:1;transform:translate(-50%,0)}
   
+  /* 手机端悬浮关闭按钮的样式（默认隐藏，只有移动端显示） */
+  .mobile-xbtn { display: none; }
+
   @media(max-width:1060px){
     .shell{display:block}
     .edge-trigger{display:none}
@@ -121,7 +125,6 @@
     main{padding:20px 16px 46px}
   }
 
-  /* 🌟 手机端深度优化 */
   @media(max-width:680px){
     .hwrap{padding:12px 16px;flex-wrap:wrap;gap:10px}.hright{width:100%;flex-wrap:wrap}.search{flex:1;min-width:150px;width:auto}
     .main-title{font-size:25px}.cards{grid-template-columns:1fr;gap:22px}.card h3{font-size:16px}
@@ -129,22 +132,23 @@
     .s-nav{flex-wrap:wrap;justify-content:center;gap:8px;padding:10px 14px}.s-nav .idx{order:-1;width:100%}.s-body{font-size:13.5px;line-height:2}
     .fwrap{flex-direction:column;gap:10px;text-align:center;padding:20px 16px}.toast{max-width:82vw;text-align:center}
     
-    /* 修复弹窗排版比例 */
+    /* 手机端深度适配 */
     .sheet { grid-template-columns: 1fr; grid-template-rows: 42vh 1fr; inset: 0; border-radius: 0; }
     .sheet-body { border-left: none; border-top: 1px solid var(--line); }
+    .sheet-top { display: none; } /* 手机端隐藏原本的顶栏 */
     
-    /* 修复关闭按钮（固定在最右上角） */
-    .sheet-top { display: none; } /* 隐藏原本的顶栏 */
-    .sheet-media { position: relative; }
-    .xbtn { 
-      position: absolute; top: 16px; right: 16px; z-index: 99; 
+    /* 手机端专属：悬浮关闭按钮 */
+    .mobile-xbtn { 
+      display: grid; 
+      position: fixed; top: 16px; right: 16px; z-index: 999; 
+      width: 36px; height: 36px;
       background: rgba(253,254,255,0.85); backdrop-filter: blur(4px); 
-      border: none; box-shadow: 0 2px 8px rgba(0,0,0,0.1); 
+      border-radius: 50%; border: none; box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      place-items: center; color: var(--ink);
     }
     
-    /* 手机端画廊控制条显示 */
     .gallery-controls { opacity: 1; visibility: visible; bottom: 15px; padding: 8px 14px; border-radius: 999px; }
-    .gallery-thumbs { display: none; } /* 手机端隐藏缩略图，留出空间给大图 */
+    .gallery-thumbs { display: none; }
   }
 </style>
 </head>
@@ -184,7 +188,11 @@
   </div>
   <footer><div class="fwrap"><span>自留地 · 一个安静的记录库</span><span class="en">slowly, gently, keep the days.</span></div></footer>
   
+  <!-- 预览弹窗 -->
   <div class="ov" id="ov">
+    <!-- 手机端专用的悬浮关闭键 -->
+    <button class="mobile-xbtn" id="ovMobileClose"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
+    
     <div class="sheet">
       <div class="sheet-media">
         <div class="stamp" id="ovStamp"></div>
@@ -355,7 +363,7 @@ window.jumpToGallery = (index) => {
 el('galleryPrev').onclick = () => { if(galleryCurIndex > 0){ galleryCurIndex--; renderGallery(); } };
 el('galleryNext').onclick = () => { if(galleryCurIndex < galleryImgs.length - 1){ galleryCurIndex++; renderGallery(); } };
 
-// 🌟 手机端滑动切图手势监听
+// 手机端滑动切图
 let touchStartX = 0;
 let touchEndX = 0;
 
@@ -398,7 +406,15 @@ el("clearDay").onclick=()=>{state.day=null;renderAll()};
 el("btnToday").onclick=()=>{const n=new Date();state.year=n.getFullYear();state.month=n.getMonth()+1;state.day=n.getDate();renderAll();toast("已跳到今天")};
 el("btnRandom").onclick=()=>{if(!DATA.length)return;const item=DATA[Math.floor(Math.random()*DATA.length)];const p=parseKey(item.date);state.year=p.y;state.month=p.m;state.day=p.d;state.query="";el("q").value="";renderAll();openPreview(item.id)};
 el("q").oninput=e=>{state.query=e.target.value;state.day=null;renderRail();renderMain()};
-el("ovClose").onclick=closePreview;el("ov").onclick=e=>{if(e.target.id==="ov")closePreview()};el("ovPrev").onclick=()=>stepPreview(-1);el("ovNext").onclick=()=>stepPreview(1);
+
+// 绑定 PC 和手机端的关闭事件
+el("ovClose").onclick=closePreview;
+el("ovMobileClose").onclick=closePreview;
+
+el("ov").onclick=e=>{if(e.target.id==="ov")closePreview()};
+el("ovPrev").onclick=()=>stepPreview(-1);
+el("ovNext").onclick=()=>stepPreview(1);
+
 el("ovCopy").onclick=async()=>{const item=state.currentList[state.currentIndex];if(!item)return;let txt=`${item.title}\n${item.date} · ${item.place||""}`;if(item.tag)txt=`【${item.tag}】`+txt;txt+=`\n\n${(item.body||[]).join("\n\n")}`;try{await navigator.clipboard.writeText(txt);toast("文案已复制"+(item.tag?"（含分类）":""))}catch{toast("复制失败，请手动选择文字")}};
 document.addEventListener("keydown",e=>{if(el("ov").classList.contains("open")){if(e.key==="Escape")closePreview();if(e.key==="ArrowRight")stepPreview(1);if(e.key==="ArrowLeft")stepPreview(-1);return}if(e.key==="/"&&document.activeElement.id!=="q"){e.preventDefault();el("q").focus()}});
 
