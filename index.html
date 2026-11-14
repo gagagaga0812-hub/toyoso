@@ -103,7 +103,6 @@
   .sheet-media:hover .gallery-controls { opacity: 1; visibility: visible; }
 
   .sheet-body{display:flex;flex-direction:column;min-height:0;background:var(--paper2);border-left:1px solid var(--line)}.sheet-top{display:flex;align-items:center;justify-content:space-between;padding:16px 26px;border-bottom:1px solid var(--line-soft)}.sheet-top .k{font-size:10px;letter-spacing:.3em;color:var(--ink3)}
-  
   .xbtn{width:32px;height:32px;border:1px solid var(--line);border-radius:50%;display:grid;place-items:center;color:var(--ink2);transition:.2s}.xbtn:hover{border-color:var(--rose);color:var(--rose);transform:rotate(90deg)}
   .sheet-scroll{flex:1;overflow-y:auto;padding:28px 34px;min-height:0;scrollbar-width:thin;scrollbar-color:var(--line) transparent}
   .s-date{font-family:Georgia,serif;font-style:italic;font-size:14px;color:var(--rose);letter-spacing:.1em;margin-bottom:14px}.s-title{font-family:var(--serif);font-size:27px;font-weight:600;line-height:1.5;margin-bottom:18px}.s-meta{display:flex;flex-wrap:wrap;gap:14px;font-size:11px;color:var(--ink3);padding-bottom:18px;border-bottom:1px solid var(--line-soft);margin-bottom:22px}.s-meta b{color:var(--ink2);font-weight:500;margin-left:5px}
@@ -114,7 +113,6 @@
   .s-nav{display:flex;gap:10px;padding:14px 26px;border-top:1px solid var(--line-soft);background:var(--paper)}.s-nav .btn{flex:1;justify-content:center}.s-nav .btn:disabled{opacity:.35;cursor:default}.s-nav .idx{align-self:center;font-size:11px;color:var(--ink3);min-width:56px;text-align:center}
   .toast{position:fixed;left:50%;bottom:36px;transform:translate(-50%,14px);background:var(--ink);color:var(--paper2);font-size:12.5px;padding:12px 24px;border-radius:999px;z-index:200;opacity:0;pointer-events:none;transition:.25s;letter-spacing:.05em;box-shadow:0 10px 30px -8px rgba(46,59,71,.4)}.toast.on{opacity:1;transform:translate(-50%,0)}
   
-  /* 手机端悬浮关闭按钮的样式（默认隐藏，只有移动端显示） */
   .mobile-xbtn { display: none; }
 
   @media(max-width:1060px){
@@ -135,9 +133,8 @@
     /* 手机端深度适配 */
     .sheet { grid-template-columns: 1fr; grid-template-rows: 42vh 1fr; inset: 0; border-radius: 0; }
     .sheet-body { border-left: none; border-top: 1px solid var(--line); }
-    .sheet-top { display: none; } /* 手机端隐藏原本的顶栏 */
+    .sheet-top { display: none; }
     
-    /* 手机端专属：悬浮关闭按钮 */
     .mobile-xbtn { 
       display: grid; 
       position: fixed; top: 16px; right: 16px; z-index: 999; 
@@ -147,8 +144,25 @@
       place-items: center; color: var(--ink);
     }
     
-    .gallery-controls { opacity: 1; visibility: visible; bottom: 15px; padding: 8px 14px; border-radius: 999px; }
-    .gallery-thumbs { display: none; }
+    /* 🌟 手机端画廊控制条与缩略图专属优化 */
+    .gallery-controls { 
+      opacity: 1; visibility: visible; 
+      bottom: 12px; padding: 6px 12px; border-radius: 16px; gap: 6px; 
+      max-width: 90vw; /* 防止缩略图太多超出屏幕 */
+    }
+    
+    .gallery-thumbs { 
+      display: flex; /* 重新显示 */
+      max-width: 100%; 
+      gap: 6px;
+      padding: 2px;
+    }
+    
+    .gallery-thumbs img { 
+      width: 28px; /* 手机端稍微缩小一点 */
+      height: 28px; 
+      border-radius: 4px;
+    }
   }
 </style>
 </head>
@@ -188,9 +202,7 @@
   </div>
   <footer><div class="fwrap"><span>自留地 · 一个安静的记录库</span><span class="en">slowly, gently, keep the days.</span></div></footer>
   
-  <!-- 预览弹窗 -->
   <div class="ov" id="ov">
-    <!-- 手机端专用的悬浮关闭键 -->
     <button class="mobile-xbtn" id="ovMobileClose"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
     
     <div class="sheet">
@@ -407,7 +419,6 @@ el("btnToday").onclick=()=>{const n=new Date();state.year=n.getFullYear();state.
 el("btnRandom").onclick=()=>{if(!DATA.length)return;const item=DATA[Math.floor(Math.random()*DATA.length)];const p=parseKey(item.date);state.year=p.y;state.month=p.m;state.day=p.d;state.query="";el("q").value="";renderAll();openPreview(item.id)};
 el("q").oninput=e=>{state.query=e.target.value;state.day=null;renderRail();renderMain()};
 
-// 绑定 PC 和手机端的关闭事件
 el("ovClose").onclick=closePreview;
 el("ovMobileClose").onclick=closePreview;
 
