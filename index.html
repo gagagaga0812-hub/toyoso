@@ -80,7 +80,6 @@
   .gallery-img-container img { max-width:100%; max-height:100%; object-fit:contain; display:block; animation:imgIn .3s ease both; }
   @keyframes imgIn{from{opacity:0}to{opacity:1}}
   
-  /* 图集切换控制栏 */
   .gallery-controls { 
     position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); 
     display: flex; flex-direction: column; gap: 10px; align-items: center; 
@@ -120,9 +119,9 @@
     aside{position:fixed;left:0;top:73px;z-index:60;box-shadow:10px 0 30px rgba(0,0,0,0.1);background:var(--paper);}
     .shell.closed aside{margin-left:-330px;}
     main{padding:20px 16px 46px}
-    .sheet{grid-template-columns:1fr;grid-template-rows:40vh 1fr;inset:12px}.sheet-body{border-left:none;border-top:1px solid var(--line)}
   }
-  
+
+  /* 🌟 手机端深度优化 */
   @media(max-width:680px){
     .hwrap{padding:12px 16px;flex-wrap:wrap;gap:10px}.hright{width:100%;flex-wrap:wrap}.search{flex:1;min-width:150px;width:auto}
     .main-title{font-size:25px}.cards{grid-template-columns:1fr;gap:22px}.card h3{font-size:16px}
@@ -130,18 +129,22 @@
     .s-nav{flex-wrap:wrap;justify-content:center;gap:8px;padding:10px 14px}.s-nav .idx{order:-1;width:100%}.s-body{font-size:13.5px;line-height:2}
     .fwrap{flex-direction:column;gap:10px;text-align:center;padding:20px 16px}.toast{max-width:82vw;text-align:center}
     
-    /* 🌟 手机端专属调整 */
-    .gallery-controls { opacity: 1; visibility: visible; bottom: 10px; padding: 6px 12px; }
-    .gallery-thumbs { display: none; } /* 手机端隐藏缩略图，保持界面干净 */
+    /* 修复弹窗排版比例 */
+    .sheet { grid-template-columns: 1fr; grid-template-rows: 42vh 1fr; inset: 0; border-radius: 0; }
+    .sheet-body { border-left: none; border-top: 1px solid var(--line); }
     
-    /* 把顶栏隐藏，把关闭按钮挪到图片右上角 */
-    .sheet-top { display: none; }
-    .sheet { position: relative; }
+    /* 修复关闭按钮（固定在最右上角） */
+    .sheet-top { display: none; } /* 隐藏原本的顶栏 */
+    .sheet-media { position: relative; }
     .xbtn { 
-      position: absolute; top: 10px; right: 10px; z-index: 99; 
+      position: absolute; top: 16px; right: 16px; z-index: 99; 
       background: rgba(253,254,255,0.85); backdrop-filter: blur(4px); 
       border: none; box-shadow: 0 2px 8px rgba(0,0,0,0.1); 
     }
+    
+    /* 手机端画廊控制条显示 */
+    .gallery-controls { opacity: 1; visibility: visible; bottom: 15px; padding: 8px 14px; border-radius: 999px; }
+    .gallery-thumbs { display: none; } /* 手机端隐藏缩略图，留出空间给大图 */
   }
 </style>
 </head>
@@ -366,16 +369,14 @@ el('ovGalleryImgBox').addEventListener('touchend', e => {
 }, {passive: true});
 
 function handleSwipe() {
-  const threshold = 50; // 滑动距离阈值
+  const threshold = 50;
   if (touchEndX < touchStartX - threshold) {
-    // 向左滑，下一页
     if (galleryCurIndex < galleryImgs.length - 1) {
       galleryCurIndex++;
       renderGallery();
     }
   }
   if (touchEndX > touchStartX + threshold) {
-    // 向右滑，上一页
     if (galleryCurIndex > 0) {
       galleryCurIndex--;
       renderGallery();
