@@ -4,6 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>自留地</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌸</text></svg>">
 <style>
   :root{--paper:#F4F8FC;--paper2:#FDFEFF;--ink:#2E3B47;--ink2:#55677A;--ink3:#8FA1B3;--rose:#6E93B5;--rose-deep:#4F7396;--rose-soft:#E2EDF6;--line:#DCE6EE;--line-soft:#E9F0F6;--gold:#9FB4C6;--serif:"Noto Serif SC","Songti SC","STSong","SimSun",serif;--sans:"Noto Sans SC","PingFang SC","Microsoft YaHei",sans-serif}
   *{box-sizing:border-box;margin:0;padding:0}html{scroll-behavior:smooth}
@@ -132,11 +133,10 @@
   <div class="toast" id="toast"></div>
 <script>
 // ==========================================
-// 🌟 核心配置区：加入 .trim() 防止复制时带入空格
+// 🌟 核心配置区：已经剔除了空格
 // ==========================================
-const SUPABASE_URL = 'https://ozgfciwblxktuzwjyang.supabase.co'.trim(); 
-// 注意：这里去掉了原来的 /rest/v1/，因为 fetch 请求时我们会自动拼接
-const SUPABASE_ANON_KEY = 'sb_publishable_Mv4ig0uVWjO8pscMU8ZdAQ_ewrAjGH5'.trim();
+const SUPABASE_URL = 'https://ozgfciwblxktuzwjyang.supabase.co'; 
+const SUPABASE_ANON_KEY = 'sb_publishable_Mv4ig0uVWjO8pscMU8ZdAQ_ewrAjGH5';
 
 let DATA = [];
 const PALETTES = [["#D5E4EF","#6E93B5","#F7FAFD"],["#D8E9E8","#7FA3A8","#F5FAF9"],["#DCE6F2","#5F83A8","#F6F9FC"],["#D0E0EA","#8FA9BF","#F8FBFD"],["#DDE8F0","#7B98B0","#F7FAFC"],["#D2E4EE","#4F7396","#F4F9FC"]];
@@ -152,7 +152,7 @@ function artFor(item){
   const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="720" viewBox="0 0 1080 720"><rect width="1080" height="720" fill="${c3}"/><defs><pattern id="w" width="5" height="5" patternUnits="userSpaceOnUse"><circle cx="1" cy="1" r=".6" fill="${c2}" opacity=".12"/></pattern></defs><rect x="24" y="24" width="1032" height="672" fill="none" stroke="${c2}" stroke-opacity=".25"/>${deco}<rect width="1080" height="720" fill="url(#w)"/><text x="64" y="96" font-family="serif" font-size="24" fill="${c2}" letter-spacing="8">${caption}</text><line x1="64" y1="120" x2="150" y2="120" stroke="${c2}" stroke-opacity=".5"/><text x="64" y="636" font-family="serif" font-size="40" fill="${c2}" letter-spacing="3">${item.title.replace(/&/g,"&amp;").replace(/</g,"&lt;").slice(0,14)}</text><text x="64" y="678" font-family="Georgia,serif" font-style="italic" font-size="20" fill="${c2}" opacity=".7">${item.date}</text></svg>`;
   return "data:image/svg+xml;charset=utf-8,"+encodeURIComponent(svg);
 }
-// 如果图片链接是飞书的外链，强制替换成动态插画，防止裂图报错
+// 拦截飞书失效的链接，直接换成好看的插画
 function imgOf(item){
   if(item.img && !item.img.includes('feishu.cn')) return item.img;
   return artFor(item);
@@ -237,13 +237,12 @@ function renderAll(){renderPicker();renderYearbar();renderRail();renderMain()}
 
 async function initApp() {
   try {
-    // 确保 URL 拼接完全正确
+    // 强制要求只带 apikey，按 Supabase 最新的 REST 规范请求
     const fetchUrl = `${SUPABASE_URL}/rest/v1/entries?select=*&order=date.desc`;
     const res = await fetch(fetchUrl, {
       method: 'GET',
       headers: { 
-        'apikey': SUPABASE_ANON_KEY, 
-        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+        'apikey': SUPABASE_ANON_KEY,
         'Content-Type': 'application/json'
       }
     });
