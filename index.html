@@ -182,7 +182,6 @@ const SUPABASE_URL = 'https://ozgfciwblxktuzwjyang.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_Mv4ig0uVWjO8pscMU8ZdAQ_ewrAjGH5';
 
 let DATA = [];
-// 画廊状态
 let galleryImgs = []; 
 let galleryCurIndex = 0;
 
@@ -263,17 +262,17 @@ function paintPreview(){
   // 组装画廊图片
   galleryImgs = [];
   if (item.video) {
-    // 如果有视频，视频绝对是第一位且是主角
     galleryImgs.push({ type: 'video', url: item.video });
   } else {
-    // 如果只有封面
-    galleryImgs.push({ type: 'img', url: imgOf(item) });
-    // 如果数据中将来有 imgs 数组（多图），在这里加入。由于我们之前的表没加 imgs 字段，目前先用单图。
-    // 如果你以后加上了 imgs 字段，代码可以写： if(item.imgs) item.imgs.forEach(u => galleryImgs.push({type:'img', url:u}));
+    // 优先使用 imgs 数组，如果没有，降级使用 img
+    if (item.imgs && Array.isArray(item.imgs) && item.imgs.length > 0) {
+      item.imgs.forEach(url => galleryImgs.push({ type: 'img', url }));
+    } else {
+      galleryImgs.push({ type: 'img', url: imgOf(item) });
+    }
   }
   galleryCurIndex = 0;
   
-  // 渲染画廊界面
   renderGallery();
 
   el("ovStamp").textContent=`${p.y}.${pad(p.m)}.${pad(p.d)}`;
@@ -304,7 +303,6 @@ function renderGallery() {
     ctrls.style.display = 'none';
   } else {
     box.innerHTML = `<img src="${esc(current.url)}" alt="相册图">`;
-    // 超过1张图显示控制条
     if (galleryImgs.length > 1) {
       ctrls.style.display = 'flex';
       el('galleryIdx').textContent = `${galleryCurIndex + 1} / ${galleryImgs.length}`;
@@ -316,7 +314,6 @@ function renderGallery() {
   }
 }
 
-// 画廊左右切换事件
 el('galleryPrev').onclick = () => { if(galleryCurIndex > 0){ galleryCurIndex--; renderGallery(); } };
 el('galleryNext').onclick = () => { if(galleryCurIndex < galleryImgs.length - 1){ galleryCurIndex++; renderGallery(); } };
 
@@ -350,7 +347,7 @@ async function initApp() {
     if(!res.ok) throw new Error('API 请求失败');
     
     const cloudData = await res.json();
-    DATA = cloudData.map(item => ({ ...item, id: String(item.id), body: item.body || [], img: item.img || '', video: item.video || '' }));
+    DATA = cloudData.map(item => ({ ...item, id: String(item.id), body: item.body || [], img: item.img || '', imgs: item.imgs || [], video: item.video || '' }));
     
     reindex();
     if(sorted.length){ const p = parseKey(sorted[sorted.length-1].date); state.year = p.y; state.month = p.m; }
